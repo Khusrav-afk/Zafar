@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZAFAR Admin — Панель управления</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root {
+      --bg:     #070707;
+      --bg2:    #0d0d0d;
+      --bg3:    #141414;
+      --bg4:    #1c1c1c;
+      --gold:   #C9A84C;
+      --gold-lt:#E8C97A;
+      --gold-dim:rgba(201,168,76,0.10);
+      --text:   #F0EBE0;
+      --text-2: #B8B0A0;
+      --text-3: #706860;
+      --border: rgba(201,168,76,0.18);
+      --border2:rgba(255,255,255,0.06);
+      --green:  #4CAF76;
+      --red:    #C94C4C;
+      --blue:   #4C7EC9;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Jost', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    /* ====== LOGIN ====== */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, rgba(201,168,76,0.04) 0%, transparent 70%);
+    }
+    .login-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 48px;
+      width: 360px;
+    }
+    .login-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .login-logo span { color: var(--gold); }
+    .login-sub {
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 40px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 12px 16px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--gold); }
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: var(--gold);
+      border: none;
+      color: #0a0800;
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .login-err { color: var(--red); font-size: 12px; text-align: center; margin-top: 12px; display: none; }
+
+    /* ====== LAYOUT ====== */
+    #app { display: none; }
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ====== SIDEBAR ====== */
+    .sidebar {
+      width: 240px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 28px 24px;
+      border-bottom: 1px solid var(--border2);
+    }
+    .sidebar-logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+    }
+    .sidebar-logo-text span { color: var(--gold); }
+    .sidebar-logo-sub {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-top: 4px;
+    }
+    .sidebar-nav { flex: 1; padding: 16px 0; }
+    .nav-section {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 8px 24px 4px;
+      margin-top: 8px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      font-size: 13px;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 2px solid transparent;
+    }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+    .nav-item.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border2);
+    }
+    .logout-btn {
+      font-size: 12px;
+      color: var(--text-3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+    .logout-btn:hover { color: var(--red); }
+
+    /* ====== MAIN ====== */
+    .main {
+      flex: 1;
+      margin-left: 240px;
+      padding: 32px;
+      min-height: 100vh;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 300;
+    }
+    .page-title em { font-style: italic; color: var(--gold-lt); }
+    .page-date { font-size: 13px; color: var(--text-3); }
+
+    /* ====== STAT CARDS ====== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card.gold::before { background: var(--gold); }
+    .stat-card.green::before { background: var(--green); }
+    .stat-card.blue::before  { background: var(--blue); }
+    .stat-card.purple::before { background: #9C4CC9; }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 12px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      font-weight: 300;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-card.gold .stat-value { color: var(--gold); }
+    .stat-card.green .stat-value { color: var(--green); }
+    .stat-card.blue .stat-value  { color: var(--blue); }
+    .stat-card.purple .stat-value { color: #9C4CC9; }
+    .stat-sub { font-size: 12px; color: var(--text-3); }
+    .stat-change { font-size: 11px; margin-top: 4px; }
+    .stat-change.up { color: var(--green); }
+    .stat-change.down { color: var(--red); }
+
+    /* ====== CHARTS ROW ====== */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .chart-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      padding: 24px;
+    }
+    .chart-title {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      margin-bottom: 24px;
+    }
+    canvas { max-height: 240px; }
+
+    /* ====== TABLE ====== */
+    .table-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border2);
+    }
+    .table-title {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .table-filter {
+      display: flex;
+      gap: 8px;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Jost', sans-serif;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      padding: 12px 24px;
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      border-bottom: 1px solid var(--border2);
+      white-space: nowrap;
+    }
+    td {
+      padding: 16px 24px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border2);
+      color: var(--text-2);
+      white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.01); }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .status-pending   { background: rgba(201,168,76,0.15); color: var(--gold); }
+    .status-confirmed { background: rgba(76,175,118,0.15); color: var(--green); }
+    .status-completed { background: rgba(76,126,201,0.15); color: var(--blue); }
+    .status-cancelled { background: rgba(201,76,76,0.15);  color: var(--red); }
+    .action-btn {
+      padding: 5px 12px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Jost', sans-serif;
+      margin-right: 4px;
+    }
+    .action-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+    /* ====== SCHEDULE / MASTERS ====== */
+    .masters-load-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .master-load-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      padding: 20px;
+    }
+    .ml-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .ml-spec { font-size: 11px; color: var(--text-3); margin-bottom: 16px; }
+    .ml-bar-wrap {
+      height: 4px;
+      background: var(--bg3);
+      border-radius: 2px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .ml-bar {
+      height: 100%;
+      background: var(--gold);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .ml-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-3);
+    }
+    .ml-stat-val { color: var(--gold); font-weight: 500; }
+
+    /* ====== DAY SCHEDULE ====== */
+    .schedule-wrap {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .schedule-col {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+    }
+    .schedule-col-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border2);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .schedule-slot {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border2);
+      font-size: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .schedule-slot:last-child { border-bottom: none; }
+    .schedule-time { color: var(--text-3); flex-shrink: 0; width: 44px; }
+    .schedule-client { color: var(--text-2); }
+    .schedule-client span { color: var(--gold); font-size: 11px; display: block; }
+    .schedule-empty { color: var(--text-3); font-size: 11px; font-style: italic; }
+
+    /* ====== SELECTS / FILTERS ====== */
+    select, .date-input {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text-2);
+      padding: 8px 12px;
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus { border-color: var(--gold); }
+
+    /* ====== LOADING ====== */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-3);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+    }
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 12px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 1024px) {
+      .sidebar { width: 200px; }
+      .main { margin-left: 200px; padding: 24px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+      .masters-load-grid { grid-template-columns: repeat(2, 1fr); }
+      .schedule-wrap { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .sidebar { transform: translateX(-100%); transition: 0.3s; z-index: 100; }
+      .sidebar.open { transform: none; }
+      .main { margin-left: 0; padding: 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .schedule-wrap { grid-template-columns: 1fr; }
+      .masters-load-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================== LOGIN ============================== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><span>Z</span>AFAR</div>
+    <div class="login-sub">Панель управления</div>
+    <div class="form-group">
+      <label class="form-label">Логин</label>
+      <input type="text" class="form-input" id="loginUser" placeholder="admin" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Пароль</label>
+      <input type="password" class="form-input" id="loginPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Войти</button>
+    <div class="login-err" id="loginErr">Неверный логин или пароль</div>
+  </div>
+</div>
+
+<!-- ============================== APP ============================== -->
+<div id="app">
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-text"><span>Z</span>AFAR</div>
+        <div class="sidebar-logo-sub">Admin Panel</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Обзор</div>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+          <span class="icon">📊</span> Дашборд
+        </div>
+        <div class="nav-section">Записи</div>
+        <div class="nav-item" onclick="showPage('bookings')">
+          <span class="icon">📋</span> Все записи
+        </div>
+        <div class="nav-item" onclick="showPage('schedule')">
+          <span class="icon">🗓️</span> Расписание
+        </div>
+        <div class="nav-section">Аналитика</div>
+        <div class="nav-item" onclick="showPage('analytics')">
+          <span class="icon">📈</span> Статистика
+        </div>
+        <div class="nav-item" onclick="showPage('masters')">
+          <span class="icon">💈</span> Мастера
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="logout-btn" onclick="doLogout()">
+          <span>🚪</span> Выйти
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+
+      <!-- ====== DASHBOARD ====== -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Дашборд <em>сегодня</em></h1>
+            <div class="page-date" id="todayDate"></div>
+          </div>
+          <button class="filter-btn" onclick="loadAll()">🔄 Обновить</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card gold">
+            <div class="stat-label">Записей сегодня</div>
+            <div class="stat-value" id="stat-today">—</div>
+            <div class="stat-sub">На <span id="stat-today-date">сегодня</span></div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Выручка сегодня</div>
+            <div class="stat-value" id="stat-revenue">—</div>
+            <div class="stat-sub">сомони</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-label">Записей на неделю</div>
+            <div class="stat-value" id="stat-week">—</div>
+            <div class="stat-sub">Следующие 7 дней</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-label">Всего записей</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-sub">За всё время</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Выручка за 7 дней</div>
+            <canvas id="revenueChart"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Популярные услуги</div>
+            <canvas id="servicesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Today bookings -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">Сегодняшние записи</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Время</th>
+                <th>Клиент</th>
+                <th>Телефон</th>
+                <th>Услуга</th>
+                <th>Мастер</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody id="todayTable"><tr><td colspan="7" class="loading">Загрузка</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== BOOKINGS ====== -->
+      <div class="page" id="page-bookings">
+        <div class="page-header">
+          <h1 class="page-title">Все <em>записи</em></h1>
+          <div class="table-filter">
+            <input type="date" class="date-input" id="filterDate"/>
+            <select id="filterStatus" onchange="loadBookings()">
+              <option value="">Все статусы</option>
+              <option value="pending">Ожидает</option>
+              <option value="confirmed">Подтверждён</option>
+              <option value="completed">Завершён</option>
+              <option value="cancelled">Отменён</option>
+            </select>
+            <button class="filter-btn active" onclick="loadBookings()">Фильтр</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Время</th>
+                <th>Клиент</th>
+                <th>Телефон</th>
+                <th>Услуга</th>
+                <th>Мастер</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTable"><tr><td colspan="9" class="loading">Загрузка</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ====== SCHEDULE ====== -->
+      <div class="page" id="page-schedule">
+        <div class="page-header">
+          <h1 class="page-title"><em>Расписание</em> мастеров</h1>
+          <input type="date" class="date-input" id="scheduleDate" onchange="loadSchedule()"/>
+        </div>
+        <div class="schedule-wrap" id="scheduleGrid">
+          <div class="loading">Загрузка</div>
+        </div>
+      </div>
+
+      <!-- ====== ANALYTICS ====== -->
+      <div class="page" id="page-analytics">
+        <div class="page-header">
+          <h1 class="page-title"><em>Аналитика</em></h1>
+          <select id="analyticsPeriod" onchange="loadAnalytics()">
+            <option value="7">7 дней</option>
+            <option value="30">30 дней</option>
+            <option value="90">90 дней</option>
+          </select>
+        </div>
+        <div class="stats-grid" id="analyticsStats"></div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Выручка по дням</div>
+            <canvas id="analyticsRevenueChart"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Загруженность по часам</div>
+            <canvas id="hoursChart"></canvas>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Записи по мастерам</div>
+            <canvas id="mastersChart"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Выручка по мастерам</div>
+            <canvas id="masterRevenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== MASTERS LOAD ====== -->
+      <div class="page" id="page-masters">
+        <div class="page-header">
+          <h1 class="page-title"><em>Мастера</em></h1>
+          <div class="page-date">Загруженность за сегодня</div>
+        </div>
+        <div class="masters-load-grid" id="mastersLoadGrid">
+          <div class="loading">Загрузка</div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">Рейтинг мастеров (по выручке)</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Мастер</th>
+                <th>Записей сегодня</th>
+                <th>Записей за месяц</th>
+                <th>Выручка за месяц</th>
+                <th>Avg чек</th>
+              </tr>
+            </thead>
+            <tbody id="mastersTable"><tr><td colspan="6" class="loading">Загрузка</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//   ⚙️  КОНФИГУРАЦИЯ — ТЕ ЖЕ ДАННЫЕ ЧТО В index.html
+// ============================================================
+const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+const ADMIN_LOGIN    = 'zafar';   // ← измените логин
+const ADMIN_PASSWORD = 'zafar2025'; // ← измените пароль
+// ============================================================
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let charts = {};
+let allBookings = [];
+let allMasters = [];
+let allServices = [];
+
+// ============================
+//   AUTH
+// ============================
+function doLogin() {
+  const u = document.getElementById('loginUser').value;
+  const p = document.getElementById('loginPass').value;
+  if (u === ADMIN_LOGIN && p === ADMIN_PASSWORD) {
+    sessionStorage.setItem('zafar_admin', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadAll();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('zafar_admin');
+  location.reload();
+}
+
+// Auto-login check
+if (sessionStorage.getItem('zafar_admin') === '1') {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  window.addEventListener('DOMContentLoaded', loadAll);
+}
+
+// ============================
+//   NAVIGATION
+// ============================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  if (name === 'bookings') loadBookings();
+  if (name === 'schedule') { setTodayScheduleDate(); loadSchedule(); }
+  if (name === 'analytics') loadAnalytics();
+  if (name === 'masters') loadMastersPage();
+}
+
+// ============================
+//   LOAD ALL
+// ============================
+async function loadAll() {
+  setTodayDate();
+  await Promise.all([loadMeta(), loadDashboard()]);
+}
+
+async function loadMeta() {
+  try {
+    const [{ data: svc }, { data: mst }] = await Promise.all([
+      db.from('services').select('*'),
+      db.from('masters').select('*')
+    ]);
+    allServices = svc || [];
+    allMasters = mst || [];
+  } catch(e) {
+    // Demo fallback
+    allServices = [
+      {id:'s1',name:'Классическая стрижка',price:50},
+      {id:'s2',name:'Стрижка + борода',price:80},
+      {id:'s3',name:'Стрижка машинкой',price:40},
+      {id:'s4',name:'Модельная стрижка',price:70},
+    ];
+    allMasters = [
+      {id:'m1',name:'Зафар',specialty:'Топ-мастер'},
+      {id:'m2',name:'Алишер',specialty:'Барбер'},
+      {id:'m3',name:'Бобур',specialty:'Стрижки'},
+      {id:'m4',name:'Санжар',specialty:'Стилист'},
+    ];
+  }
+}
+
+// ============================
+//   HELPERS
+// ============================
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+function weekEnd() {
+  const d = new Date();
+  d.setDate(d.getDate() + 7);
+  return d.toISOString().split('T')[0];
+}
+function monthStart() {
+  const d = new Date();
+  d.setDate(1);
+  return d.toISOString().split('T')[0];
+}
+function getMasterName(id) {
+  if (!id) return 'Любой';
+  const m = allMasters.find(x => x.id === id);
+  return m ? m.name : 'Неизвестен';
+}
+function getServiceName(id) {
+  if (!id) return '—';
+  const s = allServices.find(x => x.id === id);
+  return s ? s.name : 'Неизвестна';
+}
+function fmtDate(str) {
+  if (!str) return '—';
+  const [y,m,d] = str.split('-');
+  return `${d}.${m}.${y}`;
+}
+function statusBadge(s) {
+  const map = { pending:'Ожидает', confirmed:'Подтверждён', completed:'Завершён', cancelled:'Отменён' };
+  return `<span class="status-badge status-${s}">${map[s] || s}</span>`;
+}
+function setTodayDate() {
+  const d = new Date();
+  const days = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  document.getElementById('todayDate').textContent = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// ============================
+//   DASHBOARD
+// ============================
+async function loadDashboard() {
+  try {
+    const { data: all } = await db.from('bookings').select('*').neq('status','cancelled');
+    allBookings = all || [];
+  } catch(e) {
+    allBookings = generateDemoBookings();
+  }
+
+  const todayStr = today();
+  const todayBookings = allBookings.filter(b => b.booking_date === todayStr);
+  const weekBookings  = allBookings.filter(b => b.booking_date >= todayStr && b.booking_date <= weekEnd());
+
+  document.getElementById('stat-today').textContent   = todayBookings.length;
+  document.getElementById('stat-revenue').textContent = todayBookings.reduce((s,b) => s + (b.total_amount||0), 0);
+  document.getElementById('stat-week').textContent    = weekBookings.length;
+  document.getElementById('stat-total').textContent   = allBookings.length;
+
+  renderTodayTable(todayBookings);
+  renderRevenueChart(allBookings);
+  renderServicesChart(allBookings);
+}
+
+function renderTodayTable(bookings) {
+  const tbody = document.getElementById('todayTable');
+  if (!bookings.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3)">Нет записей на сегодня</td></tr>';
+    return;
+  }
+  const sorted = [...bookings].sort((a,b) => a.booking_time > b.booking_time ? 1 : -1);
+  tbody.innerHTML = sorted.map(b => `
+    <tr>
+      <td><strong style="color:var(--text)">${b.booking_time?.slice(0,5) || '—'}</strong></td>
+      <td>${b.client_name}</td>
+      <td>${b.client_phone}</td>
+      <td>${getServiceName(b.service_id)}</td>
+      <td>${getMasterName(b.master_id)}</td>
+      <td style="color:var(--gold)">${b.total_amount || 0} смн</td>
+      <td>${statusBadge(b.status)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============================
+//   ALL BOOKINGS PAGE
+// ============================
+async function loadBookings() {
+  const tbody = document.getElementById('bookingsTable');
+  tbody.innerHTML = '<tr><td colspan="9" class="loading">Загрузка</td></tr>';
+
+  let data = allBookings;
+  const dateFilter = document.getElementById('filterDate')?.value;
+  const statusFilter = document.getElementById('filterStatus')?.value;
+
+  if (dateFilter) data = data.filter(b => b.booking_date === dateFilter);
+  if (statusFilter) data = data.filter(b => b.status === statusFilter);
+
+  const sorted = [...data].sort((a,b) => {
+    if (a.booking_date !== b.booking_date) return a.booking_date > b.booking_date ? -1 : 1;
+    return a.booking_time > b.booking_time ? 1 : -1;
+  });
+
+  if (!sorted.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-3)">Нет записей</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(b => `
+    <tr>
+      <td>${fmtDate(b.booking_date)}</td>
+      <td>${b.booking_time?.slice(0,5) || '—'}</td>
+      <td><strong style="color:var(--text)">${b.client_name}</strong></td>
+      <td>${b.client_phone}</td>
+      <td>${getServiceName(b.service_id)}</td>
+      <td>${getMasterName(b.master_id)}</td>
+      <td style="color:var(--gold)">${b.total_amount || 0} смн</td>
+      <td>${statusBadge(b.status)}</td>
+      <td>
+        ${b.status === 'pending' ? `<button class="action-btn" onclick="updateStatus('${b.id}','confirmed')">✓ Подтвердить</button>` : ''}
+        ${b.status === 'confirmed' ? `<button class="action-btn" onclick="updateStatus('${b.id}','completed')">✓ Завершён</button>` : ''}
+        ${b.status !== 'cancelled' ? `<button class="action-btn danger" onclick="updateStatus('${b.id}','cancelled')">✕ Отменить</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateStatus(id, status) {
+  try {
+    await db.from('bookings').update({ status }).eq('id', id);
+    const b = allBookings.find(x => x.id === id);
+    if (b) b.status = status;
+    loadBookings();
+  } catch(e) {
+    alert('Ошибка обновления статуса');
+  }
+}
+
+// ============================
+//   SCHEDULE PAGE
+// ============================
+function setTodayScheduleDate() {
+  document.getElementById('scheduleDate').value = today();
+}
+
+async function loadSchedule() {
+  const date = document.getElementById('scheduleDate').value || today();
+  const grid = document.getElementById('scheduleGrid');
+  grid.innerHTML = '<div class="loading">Загрузка</div>';
+
+  const dayBookings = allBookings.filter(b => b.booking_date === date && b.status !== 'cancelled');
+  const slots = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+
+  grid.innerHTML = allMasters.map(m => {
+    const mBookings = dayBookings.filter(b => b.master_id === m.id || !b.master_id);
+    const slotsHtml = slots.map(slot => {
+      const bk = mBookings.find(b => b.booking_time?.startsWith(slot));
+      if (bk) {
+        return `<div class="schedule-slot">
+          <div class="schedule-time">${slot}</div>
+          <div class="schedule-client">
+            ${bk.client_name}
+            <span>${getServiceName(bk.service_id)} · ${bk.total_amount}смн</span>
+          </div>
+        </div>`;
+      }
+      return `<div class="schedule-slot"><div class="schedule-time">${slot}</div><div class="schedule-empty">свободно</div></div>`;
+    }).join('');
+
+    return `<div class="schedule-col">
+      <div class="schedule-col-header" style="border-top:2px solid var(--gold)">${m.name}</div>
+      ${slotsHtml}
+    </div>`;
+  }).join('');
+}
+
+// ============================
+//   ANALYTICS PAGE
+// ============================
+async function loadAnalytics() {
+  const days = parseInt(document.getElementById('analyticsPeriod')?.value || 7);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const data = allBookings.filter(b => b.booking_date >= cutoffStr && b.status !== 'cancelled');
+
+  const totalRev = data.reduce((s,b) => s + (b.total_amount||0), 0);
+  const avgCheck = data.length ? Math.round(totalRev / data.length) : 0;
+
+  document.getElementById('analyticsStats').innerHTML = `
+    <div class="stat-card gold">
+      <div class="stat-label">Записей за период</div>
+      <div class="stat-value">${data.length}</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Выручка за период</div>
+      <div class="stat-value">${totalRev}</div>
+      <div class="stat-sub">сомони</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Средний чек</div>
+      <div class="stat-value">${avgCheck}</div>
+      <div class="stat-sub">сомони</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Уникальных клиентов</div>
+      <div class="stat-value">${new Set(data.map(b=>b.client_phone)).size}</div>
+    </div>
+  `;
+
+  // Revenue by day
+  const byDay = {};
+  for (let i = days-1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    byDay[d.toISOString().split('T')[0]] = 0;
+  }
+  data.forEach(b => { if (byDay[b.booking_date] !== undefined) byDay[b.booking_date] += (b.total_amount||0); });
+  const dayLabels = Object.keys(byDay).map(d => d.slice(5));
+  const dayValues = Object.values(byDay);
+
+  renderChart('analyticsRevenueChart', 'line', dayLabels, [{ label:'Выручка (смн)', data: dayValues, borderColor:'#C9A84C', backgroundColor:'rgba(201,168,76,0.08)', tension:0.4, fill:true }]);
+
+  // By hour
+  const byHour = {};
+  for (let h = 9; h <= 19; h++) byHour[`${String(h).padStart(2,'0')}:00`] = 0;
+  data.forEach(b => {
+    const h = b.booking_time?.slice(0,5);
+    const hKey = h?.slice(0,3)+'00';
+    if (byHour[hKey] !== undefined) byHour[hKey]++;
+  });
+  renderChart('hoursChart', 'bar', Object.keys(byHour), [{ label:'Записей', data: Object.values(byHour), backgroundColor:'rgba(76,126,201,0.5)', borderColor:'#4C7EC9' }]);
+
+  // By master count
+  const masterCounts = allMasters.map(m => ({ name: m.name, count: data.filter(b=>b.master_id===m.id).length }));
+  renderChart('mastersChart', 'doughnut', masterCounts.map(x=>x.name), [{ data: masterCounts.map(x=>x.count), backgroundColor:['#C9A84C','#4C7EC9','#4CAF76','#9C4CC9'] }]);
+
+  // Master revenue
+  const masterRev = allMasters.map(m => ({ name: m.name, rev: data.filter(b=>b.master_id===m.id).reduce((s,b)=>s+(b.total_amount||0),0) }));
+  renderChart('masterRevenueChart', 'bar', masterRev.map(x=>x.name), [{ label:'Выручка (смн)', data: masterRev.map(x=>x.rev), backgroundColor:'rgba(201,168,76,0.6)', borderColor:'#C9A84C' }]);
+}
+
+// ============================
+//   MASTERS PAGE
+// ============================
+async function loadMastersPage() {
+  const todayStr = today();
+  const monthStr = monthStart();
+  const todayBk = allBookings.filter(b => b.booking_date === todayStr && b.status !== 'cancelled');
+  const monthBk = allBookings.filter(b => b.booking_date >= monthStr && b.status !== 'cancelled');
+
+  const grid = document.getElementById('mastersLoadGrid');
+  grid.innerHTML = allMasters.map(m => {
+    const tCount = todayBk.filter(b => b.master_id === m.id).length;
+    const maxSlots = 11;
+    const pct = Math.min(100, Math.round(tCount / maxSlots * 100));
+    return `<div class="master-load-card">
+      <div class="ml-name">${m.name}</div>
+      <div class="ml-spec">${m.specialty || ''}</div>
+      <div class="ml-bar-wrap"><div class="ml-bar" style="width:${pct}%"></div></div>
+      <div class="ml-stats">
+        <span>Загружен <span class="ml-stat-val">${pct}%</span></span>
+        <span><span class="ml-stat-val">${tCount}</span> / ${maxSlots} слотов</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const tbody = document.getElementById('mastersTable');
+  const masterStats = allMasters.map(m => {
+    const td = todayBk.filter(b => b.master_id === m.id).length;
+    const mo = monthBk.filter(b => b.master_id === m.id);
+    const moRev = mo.reduce((s,b) => s+(b.total_amount||0), 0);
+    const avg = mo.length ? Math.round(moRev / mo.length) : 0;
+    return { ...m, td, moCount: mo.length, moRev, avg };
+  }).sort((a,b) => b.moRev - a.moRev);
+
+  tbody.innerHTML = masterStats.map((m, i) => `
+    <tr>
+      <td style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:20px">${i+1}</td>
+      <td><strong style="color:var(--text)">${m.name}</strong><br><span style="font-size:11px;color:var(--text-3)">${m.specialty||''}</span></td>
+      <td>${m.td}</td>
+      <td>${m.moCount}</td>
+      <td style="color:var(--gold)">${m.moRev} смн</td>
+      <td>${m.avg} смн</td>
+    </tr>
+  `).join('');
+}
+
+// ============================
+//   CHARTS
+// ============================
+function renderChart(id, type, labels, datasets) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { labels: { color: '#706860', font: { family: 'Jost' } } }
+      },
+      scales: type !== 'doughnut' ? {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#706860' } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#706860' } }
+      } : undefined
+    }
+  });
+}
+
+function renderRevenueChart(bookings) {
+  const byDay = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    byDay[d.toISOString().split('T')[0]] = 0;
+  }
+  bookings.filter(b => b.status !== 'cancelled').forEach(b => {
+    if (byDay[b.booking_date] !== undefined) byDay[b.booking_date] += (b.total_amount||0);
+  });
+  renderChart('revenueChart', 'line', Object.keys(byDay).map(d=>d.slice(5)),
+    [{ label:'Выручка (смн)', data: Object.values(byDay), borderColor:'#C9A84C', backgroundColor:'rgba(201,168,76,0.08)', tension:0.4, fill:true }]);
+}
+
+function renderServicesChart(bookings) {
+  const bySvc = {};
+  allServices.forEach(s => bySvc[s.name] = 0);
+  bookings.filter(b=>b.status!=='cancelled').forEach(b => {
+    const s = allServices.find(x=>x.id===b.service_id);
+    if (s) bySvc[s.name] = (bySvc[s.name]||0) + 1;
+  });
+  renderChart('servicesChart', 'doughnut', Object.keys(bySvc),
+    [{ data: Object.values(bySvc), backgroundColor:['#C9A84C','#4C7EC9','#4CAF76','#9C4CC9'] }]);
+}
+
+// ============================
+//   DEMO DATA
+// ============================
+function generateDemoBookings() {
+  const masters = ['m1','m2','m3','m4'];
+  const services = [
+    {id:'s1',price:50}, {id:'s2',price:80},
+    {id:'s3',price:40}, {id:'s4',price:70}
+  ];
+  const names = ['Акбар','Умед','Рустам','Далер','Фаррух','Шерали','Бехруз','Камол'];
+  const statuses = ['pending','confirmed','completed'];
+  const bookings = [];
+  const todayStr = today();
+  for (let i = 0; i < 35; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - Math.floor(Math.random()*14) + Math.floor(Math.random()*7));
+    const svc = services[Math.floor(Math.random()*services.length)];
+    bookings.push({
+      id: 'demo-'+i,
+      master_id: masters[Math.floor(Math.random()*masters.length)],
+      service_id: svc.id,
+      client_name: names[Math.floor(Math.random()*names.length)],
+      client_phone: '+992' + Math.floor(Math.random()*900000000+100000000),
+      booking_date: d.toISOString().split('T')[0],
+      booking_time: ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'][Math.floor(Math.random()*9)]+':00',
+      status: statuses[Math.floor(Math.random()*statuses.length)],
+      total_amount: svc.price,
+    });
+  }
+  return bookings;
+}
+</script>
+</body>
+</html>
