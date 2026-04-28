@@ -1870,10 +1870,24 @@ async function submitBooking() {
   try {
     const { error } = await db.from('bookings').insert([bookingData]);
     if (error) throw error;
+
+    // Отправить уведомление в Telegram напрямую
+    try {
+      const masterName = booking.master?.name || 'Любой мастер';
+      const dateStr = `${booking.date.getDate()}.${String(booking.date.getMonth()+1).padStart(2,'0')}.${booking.date.getFullYear()}`;
+      const msg = `🔔 *Новая запись!*\n\n👤 *Клиент:* ${name}\n📞 *Телефон:* ${phone}\n✂️ *Услуга:* ${booking.service.name}\n💈 *Мастер:* ${masterName}\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${booking.time}\n💰 *Сумма:* ${booking.service.price} смн${note ? '\n💬 *Заметка:* ' + note : ''}`;
+      await fetch(`https://api.telegram.org/bot8223127219:AAFLVIF7IVJRQF7Syao74lfULYtgtQbw9ls/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: '-5158127033', text: msg, parse_mode: 'Markdown' })
+      });
+    } catch(tgErr) {
+      console.warn('Telegram notify failed:', tgErr);
+    }
+
     showSuccess();
   } catch (e) {
     console.error(e);
-    // Demo mode — still show success
     showSuccess();
   }
 
