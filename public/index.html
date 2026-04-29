@@ -888,7 +888,39 @@
       padding: 20px;
       border: 1px solid var(--border2);
       background: var(--bg2);
+      transition: all 0.42s cubic-bezier(0.23,1,0.32,1);
+      position: relative;
+      overflow: hidden;
     }
+    .about-feature::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(201,168,76,0) 0%, rgba(201,168,76,0.06) 100%);
+      opacity: 0;
+      transition: opacity 0.42s ease;
+    }
+    .about-feature::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+      opacity: 0;
+      transition: opacity 0.42s ease;
+    }
+    .about-feature:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: rgba(201,168,76,0.4) !important;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,168,76,0.12);
+    }
+    .about-feature:hover::before { opacity: 1; }
+    .about-feature:hover::after  { opacity: 1; }
+    .about-feature:hover svg {
+      filter: drop-shadow(0 0 8px rgba(201,168,76,0.65));
+      transform: scale(1.1) translateY(-2px);
+    }
+    .about-feature svg { transition: all 0.42s cubic-bezier(0.23,1,0.32,1); }
     .about-feature-icon { font-size: 24px; margin-bottom: 12px; }
     .about-feature-name { font-size: 13px; font-weight: 500; letter-spacing: 0.05em; }
 
@@ -1247,7 +1279,7 @@
         </div>
       </div>
       <div class="booking-info-item">
-        <div class="booking-info-icon">📍</div>
+        <div class="booking-info-icon" style="font-size:0"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="rgba(201,168,76,0.15)"/></svg></div>
         <div class="booking-info-text">
           <h4>Адрес</h4>
           <p>г. Худжанд, ул. Ленина, 15</p>
@@ -1480,25 +1512,25 @@
   <!-- Branch cards -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px" class="reveal">
     <div class="about-feature" style="cursor:pointer" onclick="selectBranch(0)">
-      <div class="about-feature-icon">📍</div>
+      <div class="about-feature-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="rgba(201,168,76,0.15)"/></svg></div>
       <div class="about-feature-name" style="margin-bottom:4px">Точка 1 — Центр</div>
       <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">просп. Исмоила Сомони</div>
       <div style="font-size:12px;color:var(--gold);font-weight:500">+992 92 222-5050</div>
     </div>
     <div class="about-feature" style="cursor:pointer" onclick="selectBranch(1)">
-      <div class="about-feature-icon">📍</div>
+      <div class="about-feature-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="rgba(201,168,76,0.15)"/></svg></div>
       <div class="about-feature-name" style="margin-bottom:4px">Точка 2 — Спитамен</div>
       <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">ул. Спитамен</div>
       <div style="font-size:12px;color:var(--gold);font-weight:500">+992 77 777-1111</div>
     </div>
     <div class="about-feature" style="cursor:pointer" onclick="selectBranch(2)">
-      <div class="about-feature-icon">📍</div>
+      <div class="about-feature-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="rgba(201,168,76,0.15)"/></svg></div>
       <div class="about-feature-name" style="margin-bottom:4px">Точка 3 — Фотима</div>
       <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">р-н Фотима</div>
       <div style="font-size:12px;color:var(--gold);font-weight:500">+992 99 999-0707</div>
     </div>
     <div class="about-feature" style="cursor:pointer" onclick="selectBranch(3)">
-      <div class="about-feature-icon">📍</div>
+      <div class="about-feature-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="rgba(201,168,76,0.15)"/></svg></div>
       <div class="about-feature-name" style="margin-bottom:4px">Точка 4 — Пойтахт</div>
       <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">мкр. Пойтахт</div>
       <div style="font-size:12px;color:var(--gold);font-weight:500">+992 99 999-7070</div>
@@ -1605,39 +1637,83 @@ function selectBranch(idx) {
 
 
 <!-- ====== FLOATING SOCIAL ====== -->
-<div style="
-  position:fixed;right:0;top:50%;transform:translateY(-50%);
-  z-index:200;display:flex;flex-direction:column;
-  background:#1a1a1a;border-radius:12px 0 0 12px;
-  border:1px solid rgba(255,255,255,0.08);border-right:none;
-  overflow:hidden;box-shadow:-4px 0 20px rgba(0,0,0,0.4);
-">
-  <a href="https://t.me/zafarsalon" target="_blank" title="Telegram"
-     style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-            background:#1a1a1a;transition:all 0.2s;text-decoration:none"
-     onmouseover="this.style.background='#C8A97E'" onmouseout="this.style.background='#1a1a1a'">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="#C8A97E">
-      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 14.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.496.97z"/>
+<style>
+.float-social {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.float-social-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,10,15,0.92);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-right: none;
+  text-decoration: none;
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  right: 0;
+  backdrop-filter: blur(12px);
+}
+.float-social-btn:first-child { border-radius: 10px 0 0 0; }
+.float-social-btn:last-child  { border-radius: 0 0 0 10px; }
+.float-social-btn svg {
+  width: 20px; height: 20px;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.float-social-btn:hover {
+  background: rgba(201,168,76,0.15);
+  border-color: rgba(201,168,76,0.6);
+  transform: translateX(-6px) scale(1.08);
+  box-shadow: -4px 0 20px rgba(201,168,76,0.15);
+}
+.float-social-btn:hover svg { transform: scale(1.15) rotate(-5deg); }
+.float-social-btn .tooltip {
+  position: absolute;
+  right: 56px;
+  background: rgba(10,10,15,0.95);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: #C9A84C;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding: 5px 10px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  text-transform: uppercase;
+}
+.float-social-btn:hover .tooltip { opacity: 1; }
+</style>
+<div class="float-social">
+  <a href="https://t.me/zafarsalon" target="_blank" class="float-social-btn" title="Telegram">
+    <span class="tooltip">Telegram</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
     </svg>
   </a>
-  <a href="https://instagram.com/salon_zafar" target="_blank" title="Instagram"
-     style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-            background:#1a1a1a;border-top:1px solid rgba(255,255,255,0.06);
-            transition:all 0.2s;text-decoration:none"
-     onmouseover="this.style.background='#C8A97E'" onmouseout="this.style.background='#1a1a1a'">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="2">
+  <a href="https://instagram.com/salon_zafar" target="_blank" class="float-social-btn" title="Instagram">
+    <span class="tooltip">Instagram</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-      <circle cx="12" cy="12" r="4"/>
-      <circle cx="17.5" cy="6.5" r="1" fill="#C8A97E" stroke="none"/>
+      <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
     </svg>
   </a>
-  <a href="https://wa.me/992000000000" target="_blank" title="WhatsApp"
-     style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-            background:#1a1a1a;border-top:1px solid rgba(255,255,255,0.06);
-            transition:all 0.2s;text-decoration:none"
-     onmouseover="this.style.background='#C8A97E'" onmouseout="this.style.background='#1a1a1a'">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="#C8A97E">
-      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.117 1.532 5.845L.058 23.5l5.797-1.521A11.933 11.933 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm6.173 16.658c-.26.732-1.531 1.397-2.1 1.455-.568.058-1.1.276-3.706-.773-3.12-1.253-5.12-4.44-5.276-4.645-.156-.206-1.27-1.69-1.27-3.225s.804-2.29 1.09-2.604c.285-.312.624-.39.832-.39.208 0 .416.002.598.01.192.009.449-.073.702.536.26.624.884 2.155.962 2.311.078.156.13.338.026.546-.104.208-.156.338-.312.52-.156.182-.328.407-.468.546-.156.156-.318.325-.137.637.182.312.807 1.33 1.733 2.155 1.19 1.061 2.195 1.389 2.507 1.545.312.156.494.13.676-.078.182-.208.78-.91 .988-1.222.208-.312.416-.26.702-.156.286.104 1.82.858 2.132 1.014.312.156.52.234.598.364.078.13.078.75-.182 1.482z"/>
+  <a href="https://wa.me/992000000000" target="_blank" class="float-social-btn" title="WhatsApp">
+    <span class="tooltip">WhatsApp</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
     </svg>
   </a>
 </div>
