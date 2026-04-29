@@ -8,231 +8,150 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
-    :root {
-      --bg:      #0A0A0F;
-      --bg2:     #111118;
-      --bg3:     #18181F;
-      --bg4:     #1E1E28;
-      --accent:  #C8A97E;
-      --accent2: #E8C99E;
-      --accent-dim: rgba(200,169,126,0.10);
-      --accent-dim2: rgba(200,169,126,0.05);
-      --text:    #EDE8E0;
-      --text2:   #9A9488;
-      --text3:   #5A5450;
-      --border:  rgba(200,169,126,0.15);
-      --border2: rgba(255,255,255,0.05);
-      --green:   #4DB87A;
-      --red:     #C94C4C;
-      --blue:    #4C7EC9;
-      --purple:  #9B59B6;
-      --r:       2px;
+    :root{
+      --bg:#0A0A0F;--bg2:#111118;--bg3:#18181F;--bg4:#1E1E28;
+      --accent:#C8A97E;--accent2:#E8C99E;--accent-dim:rgba(200,169,126,.10);
+      --text:#EDE8E0;--text2:#9A9488;--text3:#5A5450;
+      --border:rgba(200,169,126,.15);--border2:rgba(255,255,255,.05);
+      --green:#4DB87A;--red:#C94C4C;--blue:#4C7EC9;--purple:#9B59B6;
+      --r:2px;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    html{scroll-behavior:smooth;}
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
     ::-webkit-scrollbar{width:3px;}
-    ::-webkit-scrollbar-thumb{background:var(--accent-dim);border-radius:2px;}
+    ::-webkit-scrollbar-thumb{background:rgba(200,169,126,.2);border-radius:2px;}
 
-    /* ── LOGIN ── */
-    #loginScreen{
-      min-height:100vh;display:flex;align-items:center;justify-content:center;
-      background:radial-gradient(ellipse 60% 60% at 50% 40%, rgba(200,169,126,0.04) 0%, transparent 70%);
-    }
-    .login-box{
-      background:var(--bg2);border:1px solid var(--border);
-      padding:48px 40px;width:380px;position:relative;overflow:hidden;
-    }
-    .login-box::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:2px;
-      background:linear-gradient(90deg,transparent,var(--accent),transparent);
-    }
-    .login-logo{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;letter-spacing:0.05em;text-align:center;margin-bottom:6px;}
+    /* LOGIN */
+    #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(200,169,126,.04) 0%,transparent 70%);}
+    .login-box{background:var(--bg2);border:1px solid var(--border);padding:48px 40px;width:380px;position:relative;overflow:hidden;}
+    .login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+    .login-logo{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;letter-spacing:.05em;text-align:center;margin-bottom:6px;}
     .login-logo span{color:var(--accent);}
-    .login-sub{text-align:center;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text3);margin-bottom:36px;}
+    .login-sub{text-align:center;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:36px;}
     .fl{margin-bottom:18px;}
-    .fl label{display:block;font-size:10px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
-    .fl input{
-      width:100%;background:var(--bg3);border:1px solid var(--border2);
-      color:var(--text);padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;
-      outline:none;border-radius:var(--r);transition:border-color .2s;
-    }
+    .fl label{display:block;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+    .fl input{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;outline:none;border-radius:var(--r);transition:border-color .2s;}
     .fl input:focus{border-color:var(--accent);}
-    .btn-login{
-      width:100%;padding:14px;background:var(--accent);border:none;
-      color:#0A0800;font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;
-      letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;border-radius:var(--r);
-      margin-top:8px;transition:background .2s;
-    }
+    .btn-login{width:100%;padding:14px;background:var(--accent);border:none;color:#0A0800;font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;border-radius:var(--r);margin-top:8px;transition:background .2s;}
     .btn-login:hover{background:var(--accent2);}
     .login-err{color:var(--red);font-size:12px;text-align:center;margin-top:12px;display:none;}
 
-    /* ── APP ── */
+    /* LAYOUT */
     #app{display:none;}
     .layout{display:flex;min-height:100vh;}
-
-    /* ── SIDEBAR ── */
-    .sidebar{
-      width:220px;background:var(--bg2);border-right:1px solid var(--border2);
-      display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto;
-    }
+    .sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto;}
     .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border2);}
-    .sidebar-logo-text{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.08em;}
+    .sidebar-logo-text{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;letter-spacing:.08em;}
     .sidebar-logo-text span{color:var(--accent);}
-    .sidebar-logo-sub{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
+    .sidebar-logo-sub{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
     .sidebar-nav{flex:1;padding:12px 0;}
-    .nav-section{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text3);padding:12px 20px 4px;}
-    .nav-item{
-      display:flex;align-items:center;gap:10px;padding:11px 20px;
-      font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;
-      border-left:2px solid transparent;transition:all .2s;
-    }
+    .nav-sec{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);padding:12px 20px 4px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-left:2px solid transparent;transition:all .2s;}
     .nav-item:hover{color:var(--text);background:rgba(255,255,255,.02);}
     .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim);}
-    .nav-item .icon{font-size:15px;width:18px;text-align:center;}
     .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border2);}
     .logout-btn{font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:8px;transition:color .2s;}
     .logout-btn:hover{color:var(--red);}
-
-    /* ── MAIN ── */
     .main{flex:1;margin-left:220px;padding:28px;}
     .page{display:none;}
     .page.active{display:block;}
-    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
-    .page-title{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:400;color:var(--text);}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:400;}
     .page-title em{font-style:normal;color:var(--accent);}
     .page-sub{font-size:12px;color:var(--text3);margin-top:4px;}
 
-    /* ── STATS ── */
-    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
-    .stat-card{
-      background:var(--bg2);border:1px solid var(--border2);padding:20px;
-      border-radius:var(--r);position:relative;overflow:hidden;
-    }
-    .stat-card::after{
-      content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-    }
+    /* STATS */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+    .stat-card{background:var(--bg2);border:1px solid var(--border2);padding:20px;border-radius:var(--r);position:relative;overflow:hidden;}
+    .stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;}
     .stat-card.gold::after{background:linear-gradient(90deg,transparent,var(--accent),transparent);}
     .stat-card.green::after{background:linear-gradient(90deg,transparent,var(--green),transparent);}
     .stat-card.blue::after{background:linear-gradient(90deg,transparent,var(--blue),transparent);}
     .stat-card.purple::after{background:linear-gradient(90deg,transparent,var(--purple),transparent);}
-    .stat-label{font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
-    .stat-value{font-family:'Unbounded',sans-serif;font-size:32px;font-weight:300;line-height:1;}
-    .stat-card.gold .stat-value{color:var(--accent);}
-    .stat-card.green .stat-value{color:var(--green);}
-    .stat-card.blue .stat-value{color:var(--blue);}
-    .stat-card.purple .stat-value{color:var(--purple);}
+    .stat-lbl{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+    .stat-val{font-family:'Unbounded',sans-serif;font-size:32px;font-weight:300;line-height:1;}
+    .stat-card.gold .stat-val{color:var(--accent);}
+    .stat-card.green .stat-val{color:var(--green);}
+    .stat-card.blue .stat-val{color:var(--blue);}
+    .stat-card.purple .stat-val{color:var(--purple);}
     .stat-sub{font-size:11px;color:var(--text3);margin-top:8px;}
 
-    /* ── CHARTS ── */
-    .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:24px;}
+    /* CHARTS */
+    .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:20px;}
     .chart-card{background:var(--bg2);border:1px solid var(--border2);padding:20px;border-radius:var(--r);}
-    .chart-title{font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--text2);margin-bottom:20px;}
+    .chart-title{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;}
     canvas{max-height:200px;}
 
-    /* ── TABLE ── */
+    /* TABLE */
     .table-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
-    .table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border2);}
-    .table-title{font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--text2);}
-    .table-filters{display:flex;gap:8px;align-items:center;}
+    .table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border2);flex-wrap:wrap;gap:8px;}
+    .table-title{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);}
+    .tbl-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
     table{width:100%;border-collapse:collapse;}
-    th{padding:10px 20px;text-align:left;font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border2);white-space:nowrap;}
-    td{padding:14px 20px;font-size:12px;border-bottom:1px solid var(--border2);color:var(--text2);white-space:nowrap;}
+    th{padding:10px 16px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border2);white-space:nowrap;}
+    td{padding:12px 16px;font-size:12px;border-bottom:1px solid var(--border2);color:var(--text2);white-space:nowrap;}
     tr:last-child td{border-bottom:none;}
     tr:hover td{background:rgba(255,255,255,.01);}
-    .badge{display:inline-block;padding:3px 10px;font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;border-radius:20px;}
+    .badge{display:inline-block;padding:3px 10px;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border-radius:20px;}
     .badge-pending{background:rgba(200,169,126,.12);color:var(--accent);}
     .badge-confirmed{background:rgba(77,184,122,.12);color:var(--green);}
     .badge-completed{background:rgba(76,126,201,.12);color:var(--blue);}
     .badge-cancelled{background:rgba(201,76,76,.12);color:var(--red);}
-    .act-btn{
-      padding:4px 10px;font-size:9px;font-weight:600;letter-spacing:0.1em;
-      background:none;border:1px solid var(--border2);color:var(--text3);
-      cursor:pointer;border-radius:var(--r);transition:all .2s;font-family:'Inter',sans-serif;
-      margin-right:4px;text-transform:uppercase;
-    }
+    .act-btn{padding:4px 10px;font-size:9px;font-weight:600;letter-spacing:.1em;background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;border-radius:var(--r);transition:all .2s;font-family:'Inter',sans-serif;margin-right:4px;text-transform:uppercase;}
     .act-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .act-btn.success{border-color:rgba(77,184,122,.4);color:var(--green);}
+    .act-btn.success:hover{background:var(--green);color:#000;}
     .act-btn.danger:hover{border-color:var(--red);color:var(--red);}
 
-    /* ── SCHEDULE ── */
-    .schedule-nav{
-      display:flex;align-items:center;gap:12px;margin-bottom:20px;
-    }
-    .nav-day-btn{
-      width:36px;height:36px;background:var(--bg2);border:1px solid var(--border2);
-      color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;
-      font-size:18px;border-radius:var(--r);transition:all .2s;
-    }
+    /* SCHEDULE */
+    .sch-nav{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+    .nav-day-btn{width:36px;height:36px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:var(--r);transition:all .2s;}
     .nav-day-btn:hover{border-color:var(--accent);color:var(--accent);}
-    .schedule-date-display{
-      font-family:'Unbounded',sans-serif;font-size:14px;font-weight:400;
-      color:var(--text);padding:8px 16px;background:var(--bg2);
-      border:1px solid var(--border2);border-radius:var(--r);min-width:200px;text-align:center;
-    }
-    .today-btn{
-      padding:8px 14px;font-size:10px;font-weight:600;letter-spacing:0.15em;
-      background:var(--accent-dim);border:1px solid var(--border);color:var(--accent);
-      cursor:pointer;border-radius:var(--r);font-family:'Inter',sans-serif;
-      text-transform:uppercase;transition:all .2s;
-    }
+    .sch-date-display{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:400;color:var(--text);padding:9px 18px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);min-width:220px;text-align:center;}
+    .today-btn{padding:9px 16px;font-size:10px;font-weight:600;letter-spacing:.15em;background:var(--accent-dim);border:1px solid var(--border);color:var(--accent);cursor:pointer;border-radius:var(--r);font-family:'Inter',sans-serif;text-transform:uppercase;transition:all .2s;}
     .today-btn:hover{background:var(--accent);color:#0A0800;}
-    .schedule-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    .sch-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
     .sch-col{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;}
-    .sch-col-head{
-      padding:14px 16px;border-bottom:1px solid var(--border2);
-      font-family:'Unbounded',sans-serif;font-size:12px;font-weight:500;
-      display:flex;align-items:center;justify-content:space-between;
-    }
-    .sch-col-count{font-size:10px;color:var(--accent);background:var(--accent-dim);padding:2px 8px;border-radius:20px;}
-    .sch-slot{padding:10px 16px;border-bottom:1px solid var(--border2);display:flex;gap:10px;align-items:flex-start;}
+    .sch-col-head{padding:14px 16px;border-bottom:1px solid var(--border2);font-family:'Unbounded',sans-serif;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:space-between;}
+    .sch-count{font-size:10px;color:var(--accent);background:var(--accent-dim);padding:2px 8px;border-radius:20px;}
+    .sch-slot{border-bottom:1px solid var(--border2);}
     .sch-slot:last-child{border-bottom:none;}
-    .sch-time{color:var(--text3);font-size:11px;flex-shrink:0;width:40px;font-weight:500;margin-top:1px;}
-    .sch-client{font-size:12px;color:var(--text);}
-    .sch-svc{font-size:10px;color:var(--accent);margin-top:2px;}
+    /* Свободный слот */
+    .sch-slot-free{padding:10px 14px;display:flex;gap:10px;align-items:center;}
+    .sch-time{color:var(--text3);font-size:11px;flex-shrink:0;width:40px;font-weight:500;}
     .sch-empty{font-size:11px;color:var(--text3);font-style:italic;}
+    /* Занятый слот */
+    .sch-slot-busy{padding:10px 14px;background:rgba(200,169,126,.05);border-left:2px solid var(--accent);}
+    .sch-slot-busy.completed{background:rgba(77,184,122,.05);border-left-color:var(--green);}
+    .sch-slot-busy.cancelled{background:rgba(201,76,76,.04);border-left-color:var(--red);opacity:.5;}
+    .sch-slot-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;}
+    .sch-client{font-size:12px;color:var(--text);font-weight:500;}
+    .sch-svc{font-size:10px;color:var(--accent);margin-top:1px;}
+    .sch-done-btn{padding:3px 10px;font-size:9px;font-weight:600;letter-spacing:.1em;background:none;border:1px solid rgba(77,184,122,.4);color:var(--green);cursor:pointer;border-radius:var(--r);transition:all .2s;font-family:'Inter',sans-serif;text-transform:uppercase;}
+    .sch-done-btn:hover{background:var(--green);color:#000;}
+    .sch-done-label{font-size:10px;color:var(--green);letter-spacing:.05em;}
+    .sch-cancel-btn{padding:3px 8px;font-size:9px;background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;border-radius:var(--r);transition:all .2s;font-family:'Inter',sans-serif;}
+    .sch-cancel-btn:hover{border-color:var(--red);color:var(--red);}
 
-    /* ── MASTERS PAGE ── */
-    .masters-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    /* MASTERS */
+    .masters-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
     .master-card{background:var(--bg2);border:1px solid var(--border2);padding:20px;border-radius:var(--r);}
     .mc-name{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:500;margin-bottom:4px;}
     .mc-spec{font-size:11px;color:var(--text3);margin-bottom:16px;}
     .mc-bar-wrap{height:3px;background:var(--bg3);border-radius:2px;margin-bottom:8px;overflow:hidden;}
     .mc-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .5s ease;}
     .mc-stats{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);}
-    .mc-val{color:var(--accent);font-weight:600;}
+    .mc-v{color:var(--accent);font-weight:600;}
 
-    /* ── INPUTS ── */
-    select,.date-inp{
-      background:var(--bg3);border:1px solid var(--border2);color:var(--text2);
-      padding:8px 12px;font-family:'Inter',sans-serif;font-size:11px;
-      outline:none;cursor:pointer;border-radius:var(--r);
-    }
+    /* INPUTS */
+    select,.date-inp{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:8px 12px;font-family:'Inter',sans-serif;font-size:11px;outline:none;cursor:pointer;border-radius:var(--r);}
     select:focus{border-color:var(--accent);}
-    .filter-btn{
-      padding:8px 14px;font-size:10px;font-weight:600;letter-spacing:0.12em;
-      background:none;border:1px solid var(--border2);color:var(--text3);
-      cursor:pointer;border-radius:var(--r);font-family:'Inter',sans-serif;
-      text-transform:uppercase;transition:all .2s;
-    }
+    .filter-btn{padding:8px 14px;font-size:10px;font-weight:600;letter-spacing:.12em;background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;border-radius:var(--r);font-family:'Inter',sans-serif;text-transform:uppercase;transition:all .2s;}
     .filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+    .loading{text-align:center;padding:32px;color:var(--text3);font-size:12px;letter-spacing:.1em;}
 
-    /* ── LOADING ── */
-    .loading{text-align:center;padding:32px;color:var(--text3);font-size:12px;letter-spacing:0.1em;}
-
-    /* ── RESPONSIVE ── */
-    @media(max-width:1100px){
-      .stats-grid{grid-template-columns:repeat(2,1fr);}
-      .charts-row{grid-template-columns:1fr;}
-      .schedule-cols{grid-template-columns:repeat(2,1fr);}
-      .masters-grid{grid-template-columns:repeat(2,1fr);}
-    }
-    @media(max-width:700px){
-      .sidebar{transform:translateX(-100%);z-index:100;transition:.3s;}
-      .sidebar.open{transform:none;}
-      .main{margin-left:0;padding:16px;}
-      .stats-grid{grid-template-columns:1fr 1fr;}
-      .schedule-cols{grid-template-columns:1fr;}
-    }
+    @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}.sch-cols{grid-template-columns:repeat(2,1fr);}.masters-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:700px){.sidebar{transform:translateX(-100%);z-index:100;transition:.3s;}.main{margin-left:0;padding:16px;}.stats-grid{grid-template-columns:1fr 1fr;}.sch-cols{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
@@ -252,29 +171,26 @@
 <!-- APP -->
 <div id="app">
 <div class="layout">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-text"><span>Z</span>AFAR</div>
       <div class="sidebar-logo-sub">Admin Panel</div>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-section">Обзор</div>
-      <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">▦</span> Дашборд</div>
-      <div class="nav-section">Записи</div>
-      <div class="nav-item" onclick="showPage('bookings',this)"><span class="icon">≡</span> Все записи</div>
-      <div class="nav-item" onclick="showPage('schedule',this)"><span class="icon">◫</span> Расписание</div>
-      <div class="nav-section">Аналитика</div>
-      <div class="nav-item" onclick="showPage('analytics',this)"><span class="icon">↗</span> Статистика</div>
-      <div class="nav-item" onclick="showPage('masters',this)"><span class="icon">✦</span> Мастера</div>
+      <div class="nav-sec">Обзор</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)">▦ Дашборд</div>
+      <div class="nav-sec">Записи</div>
+      <div class="nav-item" onclick="showPage('bookings',this)">≡ Все записи</div>
+      <div class="nav-item" onclick="showPage('schedule',this)">◫ Расписание</div>
+      <div class="nav-sec">Аналитика</div>
+      <div class="nav-item" onclick="showPage('analytics',this)">↗ Статистика</div>
+      <div class="nav-item" onclick="showPage('masters',this)">✦ Мастера</div>
     </nav>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="doLogout()">⎋ Выйти</div>
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
 
     <!-- DASHBOARD -->
@@ -284,19 +200,37 @@
         <button class="filter-btn" onclick="loadAll()">↺ Обновить</button>
       </div>
       <div class="stats-grid">
-        <div class="stat-card gold"><div class="stat-label">Записей сегодня</div><div class="stat-value" id="s1">—</div><div class="stat-sub">На сегодня</div></div>
-        <div class="stat-card green"><div class="stat-label">Выручка сегодня</div><div class="stat-value" id="s2">—</div><div class="stat-sub">сомони</div></div>
-        <div class="stat-card blue"><div class="stat-label">На неделю</div><div class="stat-value" id="s3">—</div><div class="stat-sub">Записей</div></div>
-        <div class="stat-card purple"><div class="stat-label">Всего записей</div><div class="stat-value" id="s4">—</div><div class="stat-sub">За всё время</div></div>
+        <div class="stat-card gold">
+          <div class="stat-lbl">Записей сегодня</div>
+          <div class="stat-val" id="s1">—</div>
+          <div class="stat-sub">Всего на сегодня</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-lbl">Завершено сегодня</div>
+          <div class="stat-val" id="s2">—</div>
+          <div class="stat-sub">Клиент пришёл ✓</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-lbl">На неделю</div>
+          <div class="stat-val" id="s3">—</div>
+          <div class="stat-sub">Записей</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-lbl">Всего записей</div>
+          <div class="stat-val" id="s4">—</div>
+          <div class="stat-sub">За всё время</div>
+        </div>
       </div>
       <div class="charts-row">
-        <div class="chart-card"><div class="chart-title">Выручка — 7 дней</div><canvas id="revenueChart"></canvas></div>
-        <div class="chart-card"><div class="chart-title">Услуги</div><canvas id="servicesChart"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Количество записей — 7 дней</div><canvas id="bookingsChart"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Популярные услуги</div><canvas id="servicesChart"></canvas></div>
       </div>
       <div class="table-card">
         <div class="table-header"><div class="table-title">Сегодняшние записи</div></div>
-        <table><thead><tr><th>Время</th><th>Клиент</th><th>Телефон</th><th>Услуга</th><th>Мастер</th><th>Сумма</th><th>Статус</th></tr></thead>
-        <tbody id="todayTable"><tr><td colspan="7" class="loading">Загрузка...</td></tr></tbody></table>
+        <table>
+          <thead><tr><th>Время</th><th>Клиент</th><th>Телефон</th><th>Услуга</th><th>Мастер</th><th>Статус</th><th>Действие</th></tr></thead>
+          <tbody id="todayTable"><tr><td colspan="7" class="loading">Загрузка...</td></tr></tbody>
+        </table>
       </div>
     </div>
 
@@ -304,7 +238,7 @@
     <div class="page" id="page-bookings">
       <div class="page-header">
         <div><div class="page-title">Все <em>записи</em></div></div>
-        <div class="table-filters">
+        <div class="tbl-filters">
           <input type="date" class="date-inp" id="filterDate" onchange="loadBookings()"/>
           <select id="filterStatus" onchange="loadBookings()">
             <option value="">Все статусы</option>
@@ -317,8 +251,10 @@
         </div>
       </div>
       <div class="table-card">
-        <table><thead><tr><th>Дата</th><th>Время</th><th>Клиент</th><th>Телефон</th><th>Услуга</th><th>Мастер</th><th>Сумма</th><th>Статус</th><th>Действия</th></tr></thead>
-        <tbody id="bookingsTable"><tr><td colspan="9" class="loading">Загрузка...</td></tr></tbody></table>
+        <table>
+          <thead><tr><th>Дата</th><th>Время</th><th>Клиент</th><th>Телефон</th><th>Услуга</th><th>Мастер</th><th>Статус</th><th>Действия</th></tr></thead>
+          <tbody id="bookingsTable"><tr><td colspan="8" class="loading">Загрузка...</td></tr></tbody>
+        </table>
       </div>
     </div>
 
@@ -327,13 +263,13 @@
       <div class="page-header">
         <div><div class="page-title"><em>Расписание</em> мастеров</div></div>
       </div>
-      <div class="schedule-nav">
+      <div class="sch-nav">
         <button class="nav-day-btn" onclick="changeDay(-1)">‹</button>
-        <div class="schedule-date-display" id="scheduleDateDisplay">—</div>
+        <div class="sch-date-display" id="schDateDisplay">—</div>
         <button class="nav-day-btn" onclick="changeDay(1)">›</button>
         <button class="today-btn" onclick="goToday()">Сегодня</button>
       </div>
-      <div class="schedule-cols" id="scheduleGrid"><div class="loading">Загрузка...</div></div>
+      <div class="sch-cols" id="scheduleGrid"><div class="loading">Загрузка...</div></div>
     </div>
 
     <!-- ANALYTICS -->
@@ -348,12 +284,12 @@
       </div>
       <div class="stats-grid" id="analyticsStats"></div>
       <div class="charts-row">
-        <div class="chart-card"><div class="chart-title">Выручка по дням</div><canvas id="aRevenueChart"></canvas></div>
-        <div class="chart-card"><div class="chart-title">Загруженность по часам</div><canvas id="hoursChart"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Записей по дням</div><canvas id="aBookingsChart"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Завершено vs Отменено</div><canvas id="statusChart"></canvas></div>
       </div>
       <div class="charts-row">
-        <div class="chart-card"><div class="chart-title">Записи по мастерам</div><canvas id="mastersChart"></canvas></div>
-        <div class="chart-card"><div class="chart-title">Выручка по мастерам</div><canvas id="masterRevChart"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Загруженность по часам</div><canvas id="hoursChart"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Записей по мастерам</div><canvas id="mastersChart"></canvas></div>
       </div>
     </div>
 
@@ -364,9 +300,11 @@
       </div>
       <div class="masters-grid" id="mastersLoadGrid"><div class="loading">Загрузка...</div></div>
       <div class="table-card">
-        <div class="table-header"><div class="table-title">Рейтинг по выручке за месяц</div></div>
-        <table><thead><tr><th>#</th><th>Мастер</th><th>Сегодня</th><th>За месяц</th><th>Выручка</th><th>Avg чек</th></tr></thead>
-        <tbody id="mastersTable"><tr><td colspan="6" class="loading">Загрузка...</td></tr></tbody></table>
+        <div class="table-header"><div class="table-title">Рейтинг по записям за месяц</div></div>
+        <table>
+          <thead><tr><th>#</th><th>Мастер</th><th>Сегодня</th><th>Завершено</th><th>За месяц</th><th>Завершено за месяц</th></tr></thead>
+          <tbody id="mastersTable"><tr><td colspan="6" class="loading">Загрузка...</td></tr></tbody>
+        </table>
       </div>
     </div>
 
@@ -375,348 +313,340 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════
-//   CONFIG
-// ═══════════════════════════════════════════
-const SUPABASE_URL  = 'https://eozmvkcudvsvmdoicbsv.supabase.co';
-const SUPABASE_KEY  = 'sb_publishable_6iNEo0gKbdT_tC9TEMMP8A_fX2czJ85';
-const ADMIN_LOGIN   = 'zafar';
-const ADMIN_PASS    = 'zafar2025';
+const SUPABASE_URL = 'https://eozmvkcudvsvmdoicbsv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6iNEo0gKbdT_tC9TEMMP8A_fX2czJ85';
+const ADMIN_LOGIN  = 'zafar';
+const ADMIN_PASS   = 'zafar2025';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let allBookings = [], allMasters = [], allServices = [];
-let charts = {};
-let scheduleCurrentDate = new Date();
+let allBookings = [], allMasters = [], allServices = [], charts = {};
+let schedDate = new Date();
 
-// ═══════════════════════════════════════════
-//   AUTH
-// ═══════════════════════════════════════════
+// ── AUTH ──
 function doLogin() {
-  const u = document.getElementById('lu').value;
-  const p = document.getElementById('lp').value;
-  if (u === ADMIN_LOGIN && p === ADMIN_PASS) {
+  if (document.getElementById('lu').value === ADMIN_LOGIN &&
+      document.getElementById('lp').value === ADMIN_PASS) {
     sessionStorage.setItem('za','1');
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loadAll();
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
-  }
+  } else { document.getElementById('loginErr').style.display = 'block'; }
 }
 function doLogout() { sessionStorage.removeItem('za'); location.reload(); }
-if (sessionStorage.getItem('za') === '1') {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+if (sessionStorage.getItem('za')==='1') {
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
   window.addEventListener('DOMContentLoaded', loadAll);
 }
 
-// ═══════════════════════════════════════════
-//   NAVIGATION
-// ═══════════════════════════════════════════
+// ── NAV ──
 function showPage(name, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  if (el) el.classList.add('active');
-  if (name === 'bookings')  loadBookings();
-  if (name === 'schedule')  { scheduleCurrentDate = new Date(); renderScheduleDate(); loadSchedule(); }
-  if (name === 'analytics') loadAnalytics();
-  if (name === 'masters')   loadMastersPage();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  if(name==='bookings')  loadBookings();
+  if(name==='schedule')  { schedDate=new Date(); renderSchDate(); loadSchedule(); }
+  if(name==='analytics') loadAnalytics();
+  if(name==='masters')   loadMastersPage();
 }
 
-// ═══════════════════════════════════════════
-//   HELPERS
-// ═══════════════════════════════════════════
-const MONTHS_RU  = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-const WDAYS_FULL = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-const WDAYS_SH   = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-
-function fmtDate(d) { return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`; }
-function toStr(d)   { return d.toISOString().split('T')[0]; }
-function today()    { return toStr(new Date()); }
-function weekEnd()  { const d=new Date(); d.setDate(d.getDate()+7); return toStr(d); }
-function monthStart(){ const d=new Date(); d.setDate(1); return toStr(d); }
-function getMaster(id){ if(!id) return 'Любой'; const m=allMasters.find(x=>x.id===id); return m?m.name:'—'; }
-function getService(id){ if(!id) return '—'; const s=allServices.find(x=>x.id===id); return s?s.name:'—'; }
-function fmtDateStr(s){ if(!s) return '—'; const[y,m,d]=s.split('-'); return `${d}.${m}.${y}`; }
+// ── HELPERS ──
+const MR=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const WD=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const WDS=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+function toStr(d){return d.toISOString().split('T')[0];}
+function today(){return toStr(new Date());}
+function weekEnd(){const d=new Date();d.setDate(d.getDate()+7);return toStr(d);}
+function mStart(){const d=new Date();d.setDate(1);return toStr(d);}
+function fmtDs(s){if(!s)return'—';const[y,m,d]=s.split('-');return`${d}.${m}.${y}`;}
+function getMaster(id){if(!id)return'Любой';const m=allMasters.find(x=>x.id===id);return m?m.name:'—';}
+function getService(id){if(!id)return'—';const s=allServices.find(x=>x.id===id);return s?s.name:'—';}
 function badge(s){
   const map={pending:'Ожидает',confirmed:'Подтверждён',completed:'Завершён',cancelled:'Отменён'};
-  return `<span class="badge badge-${s}">${map[s]||s}</span>`;
+  return`<span class="badge badge-${s}">${map[s]||s}</span>`;
 }
 function setTodayDate(){
   const d=new Date();
-  document.getElementById('todayDate').textContent=`${WDAYS_FULL[d.getDay()]}, ${d.getDate()} ${MONTHS_RU[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('todayDate').textContent=`${WD[d.getDay()]}, ${d.getDate()} ${MR[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-// ═══════════════════════════════════════════
-//   LOAD ALL
-// ═══════════════════════════════════════════
+// ── LOAD ──
 async function loadAll() {
   setTodayDate();
   try {
-    const [{ data: svc }, { data: mst }] = await Promise.all([
+    const[{data:svc},{data:mst}]=await Promise.all([
       db.from('services').select('*'),
-      db.from('masters').select('*').eq('is_active', true)
+      db.from('masters').select('*').eq('is_active',true)
     ]);
-    allServices = svc || [];
-    allMasters  = mst || [];
-  } catch(e) {
-    allServices = [{id:'s1',name:'Классическая стрижка',price:50},{id:'s2',name:'Стрижка + борода',price:80},{id:'s3',name:'Стрижка машинкой',price:40},{id:'s4',name:'Модельная стрижка',price:70}];
-    allMasters  = [{id:'m1',name:'Зафар',specialty:'Топ-мастер'},{id:'m2',name:'Алишер',specialty:'Барбер'},{id:'m3',name:'Бобур',specialty:'Стрижки'},{id:'m4',name:'Санжар',specialty:'Стилист'}];
+    allServices=svc||[];allMasters=mst||[];
+  } catch(e){
+    allServices=[{id:'s1',name:'Классическая стрижка',price:50},{id:'s2',name:'Стрижка + борода',price:80},{id:'s3',name:'Стрижка машинкой',price:40},{id:'s4',name:'Модельная стрижка',price:70}];
+    allMasters=[{id:'m1',name:'Зафар',specialty:'Топ-мастер'},{id:'m2',name:'Алишер',specialty:'Барбер'},{id:'m3',name:'Бобур',specialty:'Стрижки'},{id:'m4',name:'Санжар',specialty:'Стилист'}];
   }
-  try {
-    const { data } = await db.from('bookings').select('*').neq('status','cancelled');
-    allBookings = data || [];
-  } catch(e) { allBookings = []; }
+  try{const{data}=await db.from('bookings').select('*');allBookings=data||[];}
+  catch(e){allBookings=[];}
   renderDashboard();
 }
 
-// ═══════════════════════════════════════════
-//   DASHBOARD
-// ═══════════════════════════════════════════
+// ── DASHBOARD ──
 function renderDashboard() {
-  const td  = today();
-  const we  = weekEnd();
-  const tdB = allBookings.filter(b => b.booking_date === td);
-  const weB = allBookings.filter(b => b.booking_date >= td && b.booking_date <= we);
+  const td=today(),we=weekEnd();
+  const tdB=allBookings.filter(b=>b.booking_date===td&&b.status!=='cancelled');
+  const weB=allBookings.filter(b=>b.booking_date>=td&&b.booking_date<=we&&b.status!=='cancelled');
+  const done=tdB.filter(b=>b.status==='completed').length;
 
-  document.getElementById('s1').textContent = tdB.length;
-  document.getElementById('s2').textContent = tdB.reduce((s,b)=>s+(b.total_amount||0),0);
-  document.getElementById('s3').textContent = weB.length;
-  document.getElementById('s4').textContent = allBookings.length;
+  document.getElementById('s1').textContent=tdB.length;
+  document.getElementById('s2').textContent=done;
+  document.getElementById('s3').textContent=weB.length;
+  document.getElementById('s4').textContent=allBookings.filter(b=>b.status!=='cancelled').length;
 
-  // Today table
-  const tbody = document.getElementById('todayTable');
-  const sorted = [...tdB].sort((a,b) => a.booking_time > b.booking_time ? 1 : -1);
-  tbody.innerHTML = sorted.length ? sorted.map(b => `
+  const tbody=document.getElementById('todayTable');
+  const sorted=[...tdB].sort((a,b)=>a.booking_time>b.booking_time?1:-1);
+  tbody.innerHTML=sorted.length?sorted.map(b=>`
     <tr>
       <td><strong style="color:var(--text)">${b.booking_time?.slice(0,5)||'—'}</strong></td>
-      <td>${b.client_name}</td><td>${b.client_phone}</td>
-      <td>${getService(b.service_id)}</td><td>${getMaster(b.master_id)}</td>
-      <td style="color:var(--accent)">${b.total_amount||0} смн</td>
+      <td><strong style="color:var(--text)">${b.client_name}</strong></td>
+      <td>${b.client_phone}</td>
+      <td>${getService(b.service_id)}</td>
+      <td>${getMaster(b.master_id)}</td>
       <td>${badge(b.status)}</td>
-    </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Записей на сегодня нет</td></tr>';
+      <td>
+        ${b.status==='completed'?'<span style="color:var(--green);font-size:11px">✓ Клиент пришёл</span>':''}
+        ${b.status!=='completed'&&b.status!=='cancelled'?`<button class="act-btn success" onclick="markDone('${b.id}')">✓ Клиент пришёл</button>`:''}
+        ${b.status!=='cancelled'&&b.status!=='completed'?`<button class="act-btn danger" onclick="updateStatus('${b.id}','cancelled')">✕</button>`:''}
+      </td>
+    </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Записей на сегодня нет</td></tr>';
 
-  // Charts
-  renderRevenueChart();
+  renderBookingsChart();
   renderServicesChart();
 }
 
-// ═══════════════════════════════════════════
-//   BOOKINGS PAGE
-// ═══════════════════════════════════════════
+// ── BOOKINGS PAGE ──
 function loadBookings() {
-  let data = [...allBookings];
-  const df = document.getElementById('filterDate')?.value;
-  const sf = document.getElementById('filterStatus')?.value;
-  if (df) data = data.filter(b => b.booking_date === df);
-  if (sf) data = data.filter(b => b.status === sf);
-  data.sort((a,b) => {
-    if (a.booking_date !== b.booking_date) return a.booking_date > b.booking_date ? -1 : 1;
-    return a.booking_time > b.booking_time ? 1 : -1;
+  let data=[...allBookings];
+  const df=document.getElementById('filterDate')?.value;
+  const sf=document.getElementById('filterStatus')?.value;
+  if(df) data=data.filter(b=>b.booking_date===df);
+  if(sf) data=data.filter(b=>b.status===sf);
+  else data=data.filter(b=>b.status!=='cancelled'||sf==='cancelled');
+  data.sort((a,b)=>{
+    if(a.booking_date!==b.booking_date)return a.booking_date>b.booking_date?-1:1;
+    return a.booking_time>b.booking_time?1:-1;
   });
-  const tbody = document.getElementById('bookingsTable');
-  tbody.innerHTML = data.length ? data.map(b => `
+  const tbody=document.getElementById('bookingsTable');
+  tbody.innerHTML=data.length?data.map(b=>`
     <tr>
-      <td>${fmtDateStr(b.booking_date)}</td>
+      <td>${fmtDs(b.booking_date)}</td>
       <td><strong style="color:var(--text)">${b.booking_time?.slice(0,5)||'—'}</strong></td>
       <td>${b.client_name}</td><td>${b.client_phone}</td>
       <td>${getService(b.service_id)}</td><td>${getMaster(b.master_id)}</td>
-      <td style="color:var(--accent)">${b.total_amount||0} смн</td>
       <td>${badge(b.status)}</td>
       <td>
-        ${b.status==='pending'?`<button class="act-btn" onclick="updateStatus('${b.id}','confirmed')">✓ Подтвердить</button>`:''}
-        ${b.status==='confirmed'?`<button class="act-btn" onclick="updateStatus('${b.id}','completed')">✓ Завершён</button>`:''}
-        ${b.status!=='cancelled'?`<button class="act-btn danger" onclick="updateStatus('${b.id}','cancelled')">✕ Отменить</button>`:''}
+        ${b.status!=='completed'&&b.status!=='cancelled'?`<button class="act-btn success" onclick="markDone('${b.id}')">✓ Пришёл</button>`:''}
+        ${b.status==='pending'?`<button class="act-btn" onclick="updateStatus('${b.id}','confirmed')">Подтвердить</button>`:''}
+        ${b.status!=='cancelled'&&b.status!=='completed'?`<button class="act-btn danger" onclick="updateStatus('${b.id}','cancelled')">✕</button>`:''}
       </td>
-    </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text3)">Нет записей</td></tr>';
+    </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Нет записей</td></tr>';
 }
 
+async function markDone(id) {
+  await updateStatus(id,'completed');
+}
 async function updateStatus(id, status) {
-  try {
-    await db.from('bookings').update({ status }).eq('id', id);
-    const b = allBookings.find(x => x.id === id);
-    if (b) b.status = status;
+  try{
+    await db.from('bookings').update({status}).eq('id',id);
+    const b=allBookings.find(x=>x.id===id);
+    if(b) b.status=status;
     loadBookings();
-  } catch(e) { alert('Ошибка'); }
+    renderDashboard();
+    loadSchedule();
+  }catch(e){alert('Ошибка обновления');}
 }
 
-// ═══════════════════════════════════════════
-//   SCHEDULE PAGE (с навигацией по дням)
-// ═══════════════════════════════════════════
-function changeDay(delta) {
-  scheduleCurrentDate.setDate(scheduleCurrentDate.getDate() + delta);
-  renderScheduleDate();
-  loadSchedule();
+// ── SCHEDULE ──
+function changeDay(d){schedDate.setDate(schedDate.getDate()+d);renderSchDate();loadSchedule();}
+function goToday(){schedDate=new Date();renderSchDate();loadSchedule();}
+function renderSchDate(){
+  const d=schedDate;
+  const isToday=toStr(d)===today();
+  document.getElementById('schDateDisplay').textContent=
+    `${isToday?'Сегодня · ':''}${WD[d.getDay()]}, ${d.getDate()} ${MR[d.getMonth()]}`;
 }
-function goToday() {
-  scheduleCurrentDate = new Date();
-  renderScheduleDate();
-  loadSchedule();
-}
-function renderScheduleDate() {
-  const d = scheduleCurrentDate;
-  const isToday = toStr(d) === today();
-  const label = isToday ? 'Сегодня · ' : '';
-  document.getElementById('scheduleDateDisplay').textContent =
-    `${label}${WDAYS_FULL[d.getDay()]}, ${d.getDate()} ${MONTHS_RU[d.getMonth()]}`;
-}
-function loadSchedule() {
-  const dateStr = toStr(scheduleCurrentDate);
-  const dayBookings = allBookings.filter(b =>
-    b.booking_date === dateStr && b.status !== 'cancelled'
-  );
-  const slots = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
-  const grid = document.getElementById('scheduleGrid');
+function loadSchedule(){
+  const ds=toStr(schedDate);
+  // Все записи на эту дату (включая отменённые, чтобы показать серым)
+  const dayBk=allBookings.filter(b=>b.booking_date===ds);
+  const slots=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+  const grid=document.getElementById('scheduleGrid');
 
-  grid.innerHTML = allMasters.map(m => {
-    // ✅ ИСПРАВЛЕНО: показываем только записи конкретного мастера
-    const mBookings = dayBookings.filter(b => b.master_id === m.id);
-    const count = mBookings.length;
+  grid.innerHTML=allMasters.map(m=>{
+    const mBk=dayBk.filter(b=>b.master_id===m.id);
+    const activeCnt=mBk.filter(b=>b.status!=='cancelled').length;
 
-    const slotsHtml = slots.map(slot => {
-      const bk = mBookings.find(b => b.booking_time?.startsWith(slot));
-      if (bk) {
-        return `<div class="sch-slot">
-          <div class="sch-time">${slot}</div>
-          <div><div class="sch-client">${bk.client_name}</div>
-          <div class="sch-svc">${getService(bk.service_id)} · ${bk.total_amount||0} смн</div></div>
+    const slotsHtml=slots.map(slot=>{
+      const bk=mBk.find(b=>b.booking_time?.startsWith(slot));
+      if(bk && bk.status!=='cancelled'){
+        const isDone=bk.status==='completed';
+        return`<div class="sch-slot">
+          <div class="sch-slot-busy ${isDone?'completed':''}">
+            <div class="sch-slot-row">
+              <div class="sch-time">${slot}</div>
+              <div style="flex:1">
+                <div class="sch-client">${bk.client_name}</div>
+                <div class="sch-svc">${getService(bk.service_id)}</div>
+              </div>
+              ${isDone
+                ?`<span class="sch-done-label">✓ Пришёл</span>`
+                :`<div style="display:flex;gap:4px">
+                    <button class="sch-done-btn" onclick="markDone('${bk.id}')">✓ Пришёл</button>
+                    <button class="sch-cancel-btn" onclick="updateStatus('${bk.id}','cancelled')">✕</button>
+                  </div>`}
+            </div>
+          </div>
         </div>`;
       }
-      return `<div class="sch-slot"><div class="sch-time">${slot}</div><div class="sch-empty">свободно</div></div>`;
+      return`<div class="sch-slot">
+        <div class="sch-slot-free">
+          <div class="sch-time">${slot}</div>
+          <div class="sch-empty">свободно</div>
+        </div>
+      </div>`;
     }).join('');
 
-    return `<div class="sch-col">
+    return`<div class="sch-col">
       <div class="sch-col-head">
         <span>${m.name}</span>
-        ${count ? `<span class="sch-col-count">${count} зап.</span>` : ''}
+        ${activeCnt?`<span class="sch-count">${activeCnt} зап.</span>`:''}
       </div>
       ${slotsHtml}
     </div>`;
   }).join('');
 
-  // Записи без назначенного мастера — показываем отдельно
-  const anyBk = dayBookings.filter(b => !b.master_id);
-  if (anyBk.length) {
-    grid.innerHTML += `<div class="sch-col" style="border-color:rgba(200,169,126,.25)">
-      <div class="sch-col-head"><span>Без мастера</span><span class="sch-col-count">${anyBk.length}</span></div>
-      ${anyBk.map(b => `<div class="sch-slot">
-        <div class="sch-time">${b.booking_time?.slice(0,5)||'—'}</div>
-        <div><div class="sch-client">${b.client_name}</div>
-        <div class="sch-svc">${getService(b.service_id)} · ${b.total_amount||0} смн</div></div>
-      </div>`).join('')}
+  // Без мастера
+  const anyBk=dayBk.filter(b=>!b.master_id&&b.status!=='cancelled');
+  if(anyBk.length){
+    grid.innerHTML+=`<div class="sch-col" style="border-color:rgba(200,169,126,.25)">
+      <div class="sch-col-head"><span style="color:var(--accent)">Без мастера</span><span class="sch-count">${anyBk.length}</span></div>
+      ${anyBk.map(b=>`
+        <div class="sch-slot">
+          <div class="sch-slot-busy ${b.status==='completed'?'completed':''}">
+            <div class="sch-slot-row">
+              <div class="sch-time">${b.booking_time?.slice(0,5)||'—'}</div>
+              <div style="flex:1"><div class="sch-client">${b.client_name}</div><div class="sch-svc">${getService(b.service_id)}</div></div>
+              ${b.status!=='completed'?`<button class="sch-done-btn" onclick="markDone('${b.id}')">✓ Пришёл</button>`:`<span class="sch-done-label">✓</span>`}
+            </div>
+          </div>
+        </div>`).join('')}
     </div>`;
   }
 }
 
-// ═══════════════════════════════════════════
-//   ANALYTICS
-// ═══════════════════════════════════════════
-function loadAnalytics() {
-  const days = parseInt(document.getElementById('analyticsPeriod')?.value || 7);
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
-  const cutStr = toStr(cutoff);
-  const data = allBookings.filter(b => b.booking_date >= cutStr && b.status !== 'cancelled');
-  const rev  = data.reduce((s,b) => s+(b.total_amount||0), 0);
-  const avg  = data.length ? Math.round(rev/data.length) : 0;
+// ── ANALYTICS ──
+function loadAnalytics(){
+  const days=parseInt(document.getElementById('analyticsPeriod')?.value||7);
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);
+  const cutStr=toStr(cutoff);
+  const data=allBookings.filter(b=>b.booking_date>=cutStr&&b.status!=='cancelled');
+  const completed=data.filter(b=>b.status==='completed').length;
+  const pct=data.length?Math.round(completed/data.length*100):0;
 
-  document.getElementById('analyticsStats').innerHTML = `
-    <div class="stat-card gold"><div class="stat-label">Записей за период</div><div class="stat-value">${data.length}</div></div>
-    <div class="stat-card green"><div class="stat-label">Выручка</div><div class="stat-value">${rev}</div><div class="stat-sub">сомони</div></div>
-    <div class="stat-card blue"><div class="stat-label">Средний чек</div><div class="stat-value">${avg}</div><div class="stat-sub">сомони</div></div>
-    <div class="stat-card purple"><div class="stat-label">Уникальных клиентов</div><div class="stat-value">${new Set(data.map(b=>b.client_phone)).size}</div></div>
+  document.getElementById('analyticsStats').innerHTML=`
+    <div class="stat-card gold"><div class="stat-lbl">Записей за период</div><div class="stat-val">${data.length}</div></div>
+    <div class="stat-card green"><div class="stat-lbl">Завершено</div><div class="stat-val">${completed}</div><div class="stat-sub">Клиенты пришли</div></div>
+    <div class="stat-card blue"><div class="stat-lbl">Конверсия</div><div class="stat-val">${pct}%</div><div class="stat-sub">Пришли / Записались</div></div>
+    <div class="stat-card purple"><div class="stat-lbl">Уникальных клиентов</div><div class="stat-val">${new Set(data.map(b=>b.client_phone)).size}</div></div>
   `;
 
-  // By day
-  const byDay = {};
-  for (let i=days-1;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); byDay[toStr(d)]=0; }
-  data.forEach(b=>{ if(byDay[b.booking_date]!==undefined) byDay[b.booking_date]+=(b.total_amount||0); });
-  mkChart('aRevenueChart','line',Object.keys(byDay).map(d=>d.slice(5)),[{label:'Выручка',data:Object.values(byDay),borderColor:'#C8A97E',backgroundColor:'rgba(200,169,126,.08)',tension:.4,fill:true}]);
+  // By day — количество записей
+  const byDay={};
+  for(let i=days-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);byDay[toStr(d)]=0;}
+  data.forEach(b=>{if(byDay[b.booking_date]!==undefined)byDay[b.booking_date]++;});
+  mkChart('aBookingsChart','line',Object.keys(byDay).map(d=>d.slice(5)),[{label:'Записей',data:Object.values(byDay),borderColor:'#C8A97E',backgroundColor:'rgba(200,169,126,.08)',tension:.4,fill:true}]);
+
+  // Status pie
+  const all=allBookings.filter(b=>b.booking_date>=cutStr);
+  mkChart('statusChart','doughnut',['Завершён','Ожидает','Отменён'],[{data:[
+    all.filter(b=>b.status==='completed').length,
+    all.filter(b=>b.status==='pending'||b.status==='confirmed').length,
+    all.filter(b=>b.status==='cancelled').length
+  ],backgroundColor:['#4DB87A','#C8A97E','#C94C4C']}]);
 
   // By hour
   const byHour={};
-  for(let h=9;h<=19;h++) byHour[`${String(h).padStart(2,'0')}:00`]=0;
-  data.forEach(b=>{ const h=b.booking_time?.slice(0,3)+'00'; if(byHour[h]!==undefined) byHour[h]++; });
+  for(let h=9;h<=19;h++)byHour[`${String(h).padStart(2,'0')}:00`]=0;
+  data.forEach(b=>{const h=b.booking_time?.slice(0,3)+'00';if(byHour[h]!==undefined)byHour[h]++;});
   mkChart('hoursChart','bar',Object.keys(byHour),[{label:'Записей',data:Object.values(byHour),backgroundColor:'rgba(76,126,201,.5)',borderColor:'#4C7EC9'}]);
 
-  const mc = allMasters.map(m=>({name:m.name,count:data.filter(b=>b.master_id===m.id).length}));
-  mkChart('mastersChart','doughnut',mc.map(x=>x.name),[{data:mc.map(x=>x.count),backgroundColor:['#C8A97E','#4C7EC9','#4DB87A','#9B59B6']}]);
-
-  const mr = allMasters.map(m=>({name:m.name,rev:data.filter(b=>b.master_id===m.id).reduce((s,b)=>s+(b.total_amount||0),0)}));
-  mkChart('masterRevChart','bar',mr.map(x=>x.name),[{label:'Выручка',data:mr.map(x=>x.rev),backgroundColor:'rgba(200,169,126,.6)',borderColor:'#C8A97E'}]);
+  // By master
+  const mc=allMasters.map(m=>({name:m.name,count:data.filter(b=>b.master_id===m.id).length}));
+  mkChart('mastersChart','bar',mc.map(x=>x.name),[{label:'Записей',data:mc.map(x=>x.count),backgroundColor:'rgba(200,169,126,.6)',borderColor:'#C8A97E'}]);
 }
 
-// ═══════════════════════════════════════════
-//   MASTERS PAGE
-// ═══════════════════════════════════════════
-function loadMastersPage() {
-  const td  = today();
-  const ms  = monthStart();
-  const tdB = allBookings.filter(b => b.booking_date === td && b.status !== 'cancelled');
-  const moB = allBookings.filter(b => b.booking_date >= ms && b.status !== 'cancelled');
+// ── MASTERS PAGE ──
+function loadMastersPage(){
+  const td=today(),ms=mStart();
+  const tdB=allBookings.filter(b=>b.booking_date===td&&b.status!=='cancelled');
+  const moB=allBookings.filter(b=>b.booking_date>=ms&&b.status!=='cancelled');
 
-  document.getElementById('mastersLoadGrid').innerHTML = allMasters.map(m => {
-    const cnt = tdB.filter(b => b.master_id === m.id).length;
-    const pct = Math.min(100, Math.round(cnt/11*100));
-    return `<div class="master-card">
+  document.getElementById('mastersLoadGrid').innerHTML=allMasters.map(m=>{
+    const cnt=tdB.filter(b=>b.master_id===m.id).length;
+    const pct=Math.min(100,Math.round(cnt/11*100));
+    return`<div class="master-card">
       <div class="mc-name">${m.name}</div>
       <div class="mc-spec">${m.specialty||''}</div>
       <div class="mc-bar-wrap"><div class="mc-bar" style="width:${pct}%"></div></div>
       <div class="mc-stats">
-        <span>Загружен <span class="mc-val">${pct}%</span></span>
-        <span><span class="mc-val">${cnt}</span>/11 слотов</span>
+        <span>Загружен <span class="mc-v">${pct}%</span></span>
+        <span><span class="mc-v">${cnt}</span>/11 слотов</span>
       </div>
     </div>`;
   }).join('');
 
-  const stats = allMasters.map(m => {
-    const td2 = tdB.filter(b=>b.master_id===m.id).length;
-    const mo  = moB.filter(b=>b.master_id===m.id);
-    const moR = mo.reduce((s,b)=>s+(b.total_amount||0),0);
-    return {...m, td2, moC:mo.length, moR, avg:mo.length?Math.round(moR/mo.length):0};
-  }).sort((a,b)=>b.moR-a.moR);
+  const stats=allMasters.map(m=>{
+    const tdCnt=tdB.filter(b=>b.master_id===m.id).length;
+    const tdDone=tdB.filter(b=>b.master_id===m.id&&b.status==='completed').length;
+    const mo=moB.filter(b=>b.master_id===m.id);
+    const moDone=mo.filter(b=>b.status==='completed').length;
+    return{...m,tdCnt,tdDone,moC:mo.length,moDone};
+  }).sort((a,b)=>b.moC-a.moC);
 
-  document.getElementById('mastersTable').innerHTML = stats.map((m,i) => `
+  document.getElementById('mastersTable').innerHTML=stats.map((m,i)=>`
     <tr>
       <td style="color:var(--accent);font-family:'Unbounded',sans-serif">${i+1}</td>
       <td><strong style="color:var(--text)">${m.name}</strong><br><span style="font-size:10px;color:var(--text3)">${m.specialty||''}</span></td>
-      <td>${m.td2}</td><td>${m.moC}</td>
-      <td style="color:var(--accent)">${m.moR} смн</td>
-      <td>${m.avg} смн</td>
+      <td>${m.tdCnt}</td>
+      <td style="color:var(--green)">${m.tdDone} ✓</td>
+      <td>${m.moC}</td>
+      <td style="color:var(--green)">${m.moDone} ✓</td>
     </tr>`).join('');
 }
 
-// ═══════════════════════════════════════════
-//   CHARTS
-// ═══════════════════════════════════════════
-function mkChart(id, type, labels, datasets) {
-  if (charts[id]) charts[id].destroy();
-  const ctx = document.getElementById(id);
-  if (!ctx) return;
-  charts[id] = new Chart(ctx, {
-    type, data: { labels, datasets },
-    options: {
-      responsive:true, maintainAspectRatio:true,
-      plugins:{ legend:{ labels:{ color:'#5A5450', font:{family:'Inter'} } } },
-      scales: type!=='doughnut' ? {
-        x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#5A5450',font:{family:'Inter',size:10}}},
-        y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#5A5450',font:{family:'Inter',size:10}}}
-      } : undefined
-    }
-  });
+// ── CHARTS ──
+function mkChart(id,type,labels,datasets){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id);if(!ctx)return;
+  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{
+    responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{labels:{color:'#5A5450',font:{family:'Inter'}}}},
+    scales:type!=='doughnut'?{
+      x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#5A5450',font:{family:'Inter',size:10}}},
+      y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#5A5450',font:{family:'Inter',size:10}}}
+    }:undefined
+  }});
 }
-function renderRevenueChart() {
-  const byDay = {};
-  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); byDay[toStr(d)]=0; }
-  allBookings.filter(b=>b.status!=='cancelled').forEach(b=>{ if(byDay[b.booking_date]!==undefined) byDay[b.booking_date]+=(b.total_amount||0); });
-  mkChart('revenueChart','line',Object.keys(byDay).map(d=>d.slice(5)),[{label:'Выручка',data:Object.values(byDay),borderColor:'#C8A97E',backgroundColor:'rgba(200,169,126,.08)',tension:.4,fill:true}]);
+function renderBookingsChart(){
+  const byDay={};
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);byDay[toStr(d)]=0;}
+  allBookings.filter(b=>b.status!=='cancelled').forEach(b=>{if(byDay[b.booking_date]!==undefined)byDay[b.booking_date]++;});
+  mkChart('bookingsChart','bar',Object.keys(byDay).map(d=>d.slice(5)),[{label:'Записей',data:Object.values(byDay),backgroundColor:'rgba(200,169,126,.5)',borderColor:'#C8A97E',borderRadius:3}]);
 }
-function renderServicesChart() {
-  const bySvc = {};
+function renderServicesChart(){
+  const bySvc={};
   allServices.forEach(s=>bySvc[s.name]=0);
-  allBookings.filter(b=>b.status!=='cancelled').forEach(b=>{ const s=allServices.find(x=>x.id===b.service_id); if(s) bySvc[s.name]=(bySvc[s.name]||0)+1; });
+  allBookings.filter(b=>b.status!=='cancelled').forEach(b=>{const s=allServices.find(x=>x.id===b.service_id);if(s)bySvc[s.name]=(bySvc[s.name]||0)+1;});
   mkChart('servicesChart','doughnut',Object.keys(bySvc),[{data:Object.values(bySvc),backgroundColor:['#C8A97E','#4C7EC9','#4DB87A','#9B59B6']}]);
 }
 </script>
