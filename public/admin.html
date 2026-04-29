@@ -5,7 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZAFAR Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+// ── CANCEL WITH UNDO ──
+let undoTimer = null;
+function cancelWithUndo(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  const prevStatus = b.status;
+  // Optimistically cancel
+  b.status = 'cancelled';
+  loadSchedule();
+  renderDashboard();
+
+  // Show undo toast
+  showUndoToast(
+    '❌ Запись отменена',
+    async () => {
+      // Undo
+      b.status = prevStatus;
+      await db.from('bookings').update({status: prevStatus}).eq('id', id);
+      loadSchedule();
+      renderDashboard();
+      loadBookings();
+    },
+    async () => {
+      // Confirm cancel in DB
+      await db.from('bookings').update({status: 'cancelled'}).eq('id', id);
+      loadBookings();
+    }
+  );
+}
+
+function showUndoToast(msg, onUndo, onConfirm) {
+  if (undoTimer) clearTimeout(undoTimer);
+  const toast = document.getElementById('undoToast');
+  const msgEl = document.getElementById('undoMsg');
+  const bar   = document.getElementById('undoBar');
+  msgEl.textContent = msg;
+  toast.style.display = 'flex';
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  setTimeout(() => {
+    bar.style.transition = 'width 5s linear';
+    bar.style.width = '0%';
+  }, 30);
+
+  // Store callbacks
+  toast._onUndo = onUndo;
+  toast._onConfirm = onConfirm;
+
+  undoTimer = setTimeout(() => {
+    toast.style.display = 'none';
+    if (onConfirm) onConfirm();
+  }, 5000);
+}
+
+function doUndo() {
+  if (undoTimer) clearTimeout(undoTimer);
+  const toast = document.getElementById('undoToast');
+  if (toast._onUndo) toast._onUndo();
+  toast.style.display = 'none';
+}
+</script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
     :root{
@@ -502,7 +563,7 @@ function loadSchedule(){
                 ?`<span class="sch-done-label">✓ Пришёл</span>`
                 :`<div style="display:flex;gap:4px">
                     <button class="sch-done-btn" onclick="markDone('${bk.id}')">✓ Пришёл</button>
-                    <button class="sch-cancel-btn" onclick="updateStatus('${bk.id}','cancelled')">✕</button>
+                    <button class="sch-cancel-btn" onclick="cancelWithUndo('${bk.id}')">✕</button>
                   </div>`}
             </div>
           </div>
@@ -650,5 +711,14 @@ function renderServicesChart(){
   mkChart('servicesChart','doughnut',Object.keys(bySvc),[{data:Object.values(bySvc),backgroundColor:['#C8A97E','#4C7EC9','#4DB87A','#9B59B6']}]);
 }
 </script>
+
+<!-- UNDO TOAST -->
+<div id="undoToast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#18181F;border:1px solid rgba(200,169,126,.3);padding:14px 20px;z-index:9999;align-items:center;gap:16px;min-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
+  <div style="flex:1">
+    <div id="undoMsg" style="font-size:13px;color:#EDE8E0;margin-bottom:6px"></div>
+    <div style="height:2px;background:#1E1E28;border-radius:1px;overflow:hidden"><div id="undoBar" style="height:100%;background:#C8A97E;width:100%"></div></div>
+  </div>
+  <button onclick="doUndo()" style="padding:8px 16px;background:#C8A97E;border:none;color:#0A0800;font-family:Unbounded,sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;cursor:pointer;white-space:nowrap">↩ ВЕРНУТЬ</button>
+</div>
 </body>
 </html>
