@@ -100,6 +100,26 @@
       letter-spacing: 0.15em;
       color: var(--text);
     }
+    .logo img {
+      animation: logoGlow 3s ease-in-out infinite;
+    }
+    @keyframes logoGlow {
+      0%, 100% { box-shadow: 0 0 0px rgba(201,168,76,0); filter: brightness(1); }
+      50%       { box-shadow: 0 0 16px rgba(201,168,76,0.55), 0 0 32px rgba(201,168,76,0.2); filter: brightness(1.1); }
+    }
+    .logo span {
+      background: linear-gradient(90deg, #C9A84C 0%, #E8D5A0 40%, #C9A84C 60%, #9E7A30 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: logoShimmer 3s linear infinite;
+    }
+    @keyframes logoShimmer {
+      0%   { background-position: 200% center; }
+      100% { background-position: 0% center; }
+    }
+
     .logo span { color: var(--gold); }
     nav { display: flex; align-items: center; gap: 36px; }
     nav a {
@@ -1306,24 +1326,59 @@
       <div class="booking-steps">
         <div class="step-indicator active" id="step-ind-1">
           <div class="step-num">1</div>
-          <div class="step-label">Услуга</div>
+          <div class="step-label">Точка</div>
         </div>
         <div class="step-indicator" id="step-ind-2">
           <div class="step-num">2</div>
-          <div class="step-label">Мастер</div>
+          <div class="step-label">Услуга</div>
         </div>
         <div class="step-indicator" id="step-ind-3">
           <div class="step-num">3</div>
-          <div class="step-label">Время</div>
+          <div class="step-label">Мастер</div>
         </div>
         <div class="step-indicator" id="step-ind-4">
           <div class="step-num">4</div>
+          <div class="step-label">Время</div>
+        </div>
+        <div class="step-indicator" id="step-ind-5">
+          <div class="step-num">5</div>
           <div class="step-label">Контакты</div>
         </div>
       </div>
 
-      <!-- Step 1: Service -->
+      <!-- Step 1: Branch selection (NEW) -->
       <div class="booking-panel active" id="panel-1">
+        <h3>Выберите точку</h3>
+        <p>Выберите удобный филиал ZAFAR</p>
+        <div class="option-grid" id="branchOptions">
+          <div class="option-card" data-branch="0" onclick="selectBranch0(this,0)">
+            <div class="option-name">Точка 1 — Центр</div>
+            <div class="option-detail">просп. Исмоила Сомони</div>
+            <div class="option-price" style="color:var(--gold)">+992 92 222-5050</div>
+          </div>
+          <div class="option-card" data-branch="1" onclick="selectBranch0(this,1)">
+            <div class="option-name">Точка 2 — Спитамен</div>
+            <div class="option-detail">ул. Спитамен</div>
+            <div class="option-price" style="color:var(--gold)">+992 77 777-1111</div>
+          </div>
+          <div class="option-card" data-branch="2" onclick="selectBranch0(this,2)">
+            <div class="option-name">Точка 3 — Фотима</div>
+            <div class="option-detail">р-н Фотима</div>
+            <div class="option-price" style="color:var(--gold)">+992 99 999-0707</div>
+          </div>
+          <div class="option-card" data-branch="3" onclick="selectBranch0(this,3)">
+            <div class="option-name">Точка 4 — Пойтахт</div>
+            <div class="option-detail">мкр. Пойтахт</div>
+            <div class="option-price" style="color:var(--gold)">+992 99 999-7070</div>
+          </div>
+        </div>
+        <div class="booking-nav">
+          <button class="btn-next" id="next0" disabled onclick="goStep(2)">Далее →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Service (was Step 1) -->
+      <div class="booking-panel" id="panel-2">
         <h3>Выберите услугу</h3>
         <p>Выберите услугу, которую хотите получить</p>
         <div class="option-grid" id="serviceOptions">
@@ -1349,12 +1404,12 @@
           </div>
         </div>
         <div class="booking-nav">
-          <button class="btn-next" id="next1" disabled onclick="goStep(2)">Далее →</button>
+          <button class="btn-next" id="next1" disabled onclick="goStep(3)">Далее →</button>
         </div>
       </div>
 
       <!-- Step 2: Master -->
-      <div class="booking-panel" id="panel-2">
+      <div class="booking-panel" id="panel-3">
         <h3>Выберите мастера</h3>
         <p>Выберите мастера или оставьте выбор за нами</p>
         <div class="option-grid" id="masterOptions">
@@ -1370,13 +1425,13 @@
           <!-- Masters filled from Supabase -->
         </div>
         <div class="booking-nav">
-          <button class="btn-back" onclick="goStep(1)">← Назад</button>
-          <button class="btn-next" id="next2" disabled onclick="goStep(3)">Далее →</button>
+          <button class="btn-back" onclick="goStep(2)">← Назад</button>
+          <button class="btn-next" id="next2" disabled onclick="goStep(4)">Далее →</button>
         </div>
       </div>
 
       <!-- Step 3: Date & Time -->
-      <div class="booking-panel" id="panel-3">
+      <div class="booking-panel" id="panel-4">
         <h3>Выберите дату и время</h3>
         <p>Занятые слоты помечены серым</p>
         <div class="calendar-wrap">
@@ -1392,17 +1447,18 @@
           <div class="slots-loading">Выберите дату</div>
         </div>
         <div class="booking-nav">
-          <button class="btn-back" onclick="goStep(2)">← Назад</button>
-          <button class="btn-next" id="next3" disabled onclick="goStep(4)">Далее →</button>
+          <button class="btn-back" onclick="goStep(3)">← Назад</button>
+          <button class="btn-next" id="next3" disabled onclick="goStep(5)">Далее →</button>
         </div>
       </div>
 
       <!-- Step 4: Contacts -->
-      <div class="booking-panel" id="panel-4">
+      <div class="booking-panel" id="panel-5">
         <h3>Ваши контакты</h3>
         <p>Укажите данные для подтверждения записи</p>
         <div class="booking-summary" id="bookingSummary">
           <h4>Ваш заказ</h4>
+          <div class="summary-row"><span>Точка</span><strong id="sum-branch">—</strong></div>
           <div class="summary-row"><span>Услуга</span><strong id="sum-service">—</strong></div>
           <div class="summary-row"><span>Мастер</span><strong id="sum-master">—</strong></div>
           <div class="summary-row"><span>Дата</span><strong id="sum-date">—</strong></div>
@@ -1437,7 +1493,7 @@
           </div>
         </div>
         <div class="booking-nav">
-          <button class="btn-back" onclick="goStep(3)">← Назад</button>
+          <button class="btn-back" onclick="goStep(4)">← Назад</button>
           <button class="btn-next" id="submitBtn" onclick="submitBooking()">Подтвердить запись ✓</button>
         </div>
       </div>
@@ -1737,6 +1793,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 //   STATE
 // ============================================================
 const booking = {
+  branch: null,  // { idx, name, address, phone }
   service: null, // { id, name, price, duration }
   master: null,  // { id, name } or null for "any"
   date: null,    // Date object
@@ -1854,6 +1911,22 @@ function renderMasterOptions(mst) {
 }
 
 // ============================================================
+//   SELECT BRANCH (Step 1)
+// ============================================================
+const BRANCH_DATA = [
+  { idx:0, name:'Точка 1 — Центр',    address:'просп. Исмоила Сомони', phone:'+992 92 222-5050' },
+  { idx:1, name:'Точка 2 — Спитамен', address:'ул. Спитамен',          phone:'+992 77 777-1111' },
+  { idx:2, name:'Точка 3 — Фотима',   address:'р-н Фотима',            phone:'+992 99 999-0707' },
+  { idx:3, name:'Точка 4 — Пойтахт',  address:'мкр. Пойтахт',          phone:'+992 99 999-7070' },
+];
+function selectBranch0(el, idx) {
+  document.querySelectorAll('#branchOptions .option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  booking.branch = BRANCH_DATA[idx];
+  document.getElementById('next0').disabled = false;
+}
+
+// ============================================================
 //   STEP NAVIGATION
 // ============================================================
 function goStep(n) {
@@ -1867,8 +1940,8 @@ function goStep(n) {
   ind.classList.remove('done');
   ind.classList.add('active');
 
-  if (n === 3) { renderCalendar(); }
-  if (n === 4) { fillSummary(); }
+  if (n === 4) { renderCalendar(); }
+  if (n === 5) { fillSummary(); }
 
   // Scroll to booking section
   document.getElementById('booking').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1881,7 +1954,7 @@ function selectService(el, svc) {
   document.querySelectorAll('#serviceOptions .option-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   booking.service = { id: svc.id, name: svc.name, price: svc.price, duration: svc.duration_minutes };
-  document.getElementById('next1').disabled = false;
+  document.getElementById('next3').disabled = false;
 }
 
 // ============================================================
@@ -2040,6 +2113,7 @@ function selectSlot(time, el) {
 const MONTHS_RU_GEN = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
 function fillSummary() {
+  document.getElementById('sum-branch').textContent = booking.branch?.name || '—';
   document.getElementById('sum-service').textContent = booking.service?.name || '—';
   document.getElementById('sum-master').textContent = booking.master?.name || 'Любой мастер';
   if (booking.date) {
@@ -2147,7 +2221,7 @@ async function submitBooking() {
     try {
       const masterName = booking.master?.name || 'Любой мастер';
       const dateStr = `${booking.date.getDate()}.${String(booking.date.getMonth()+1).padStart(2,'0')}.${booking.date.getFullYear()}`;
-      const msg = `🔔 *Новая запись!*\n\n👤 *Клиент:* ${name}\n📞 *Телефон:* ${phone}${tg ? '\n✈️ *Telegram:* '+tg : ''}\n✂️ *Услуга:* ${booking.service.name}\n💈 *Мастер:* ${masterName}\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${booking.time}\n💰 *Сумма:* ${booking.service.price} смн${note ? '\n💬 *Заметка:* ' + note : ''}`;
+      const msg = `🔔 *Новая запись!*\n\n📍 *Точка:* ${booking.branch?.name || '—'}\n👤 *Клиент:* ${name}\n📞 *Телефон:* ${phone}${tg ? '\n✈️ *Telegram:* '+tg : ''}\n✂️ *Услуга:* ${booking.service.name}\n💈 *Мастер:* ${masterName}\n📅 *Дата:* ${dateStr}\n⏰ *Время:* ${booking.time}\n💰 *Сумма:* ${booking.service.price} смн${note ? '\n💬 *Заметка:* ' + note : ''}`;
       await fetch(`https://api.telegram.org/bot8223127219:AAFLVIF7IVJRQF7Syao74lfULYtgtQbw9ls/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
