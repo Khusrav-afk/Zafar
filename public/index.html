@@ -2488,9 +2488,37 @@ let currentRating = 0;
 function setRating(v) {
   currentRating = v;
   document.querySelectorAll('.star').forEach(s => {
-    s.classList.toggle('active', parseInt(s.dataset.v) <= v);
+    const sv = parseInt(s.dataset.v);
+    s.classList.toggle('active', sv <= v);
+    if (sv === v) {
+      s.classList.add('pulse');
+      setTimeout(() => s.classList.remove('pulse'), 350);
+    }
   });
 }
+
+// Star hover preview effect
+document.addEventListener('DOMContentLoaded', () => {
+  const stars = document.querySelectorAll('#starRating .star');
+  stars.forEach(star => {
+    star.addEventListener('mouseenter', () => {
+      const hv = parseInt(star.dataset.v);
+      stars.forEach(s => {
+        const sv = parseInt(s.dataset.v);
+        if (sv <= hv) {
+          s.style.color = '#E8C97A';
+          s.style.filter = 'drop-shadow(0 0 4px rgba(232,201,122,0.5))';
+        } else {
+          s.style.color = '';
+          s.style.filter = '';
+        }
+      });
+    });
+    star.addEventListener('mouseleave', () => {
+      stars.forEach(s => { s.style.color = ''; s.style.filter = ''; });
+    });
+  });
+});
 
 document.getElementById('reviewText')?.addEventListener('input', function() {
   document.getElementById('reviewCharCount').textContent = this.value.length + ' / 400';
@@ -2576,6 +2604,70 @@ document.addEventListener('DOMContentLoaded', loadReviews);
 const shakeStyle = document.createElement('style');
 shakeStyle.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }';
 document.head.appendChild(shakeStyle);
+
+
+// ── REVIEWS ADMIN ──
+let allReviews = [];
+
+async function loadReviewsAdmin() {
+  try {
+    const { data } = await db.from('reviews').select('*').order('created_at', { ascending: false });
+    allReviews = data || [];
+  } catch(e) { allReviews = []; }
+
+  const filter = document.getElementById('rvFilter')?.value;
+  let data = filter ? allReviews.filter(r => r.rating == filter) : allReviews;
+
+  // Stats
+  const total = allReviews.length;
+  const avg = total ? (allReviews.reduce((s,r) => s+(r.rating||5),0)/total).toFixed(1) : '—';
+  const monthAgo = new Date(); monthAgo.setDate(monthAgo.getDate()-30);
+  const monthly = allReviews.filter(r => new Date(r.created_at) > monthAgo).length;
+  document.getElementById('rv-total').textContent = total;
+  document.getElementById('rv-avg').textContent = avg + ' ★';
+  document.getElementById('rv-month').textContent = monthly;
+
+  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  document.getElementById('reviewsAdminTable').innerHTML = data.length ? data.map(r => {
+    const d = new Date(r.created_at);
+    const ds = d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+    const stars = '★'.repeat(r.rating||5)+'☆'.repeat(5-(r.rating||5));
+    return `<tr id="rv-row-${r.id}">
+      <td style="white-space:nowrap">${ds}</td>
+      <td><strong style="color:var(--text)">${r.name}</strong></td>
+      <td style="color:var(--accent);letter-spacing:2px">${stars}</td>
+      <td style="max-width:400px;white-space:normal;color:var(--text-2)">${r.text}</td>
+      <td>
+        <button class="act-btn danger" onclick="deleteReview('${r.id}','${r.name.replace(/'/g,"\'")}')">✕ Удалить</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">Нет отзывов</td></tr>';
+}
+
+async function deleteReview(id, name) {
+  const row = document.getElementById('rv-row-'+id);
+  const prevHtml = row.innerHTML;
+  row.style.opacity = '0.4';
+
+  // Show undo
+  showUndo('🗑️', `Отзыв удалён: ${name}`,
+    // undo — restore row
+    () => {
+      row.style.opacity = '1';
+      row.innerHTML = prevHtml;
+      allReviews = allReviews.filter(r => r.id !== id); // keep in UI but not deleted from DB
+    },
+    // confirm — actually delete
+    async () => {
+      await db.from('reviews').delete().eq('id', id);
+      row.remove();
+      allReviews = allReviews.filter(r => r.id !== id);
+      // update stats
+      const total = document.getElementById('rv-total');
+      if (total) total.textContent = parseInt(total.textContent||0) - 1;
+    }
+  );
+}
 
 </script>
 </body>
