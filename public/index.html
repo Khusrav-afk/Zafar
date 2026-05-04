@@ -1162,6 +1162,82 @@
       .about-features { grid-template-columns: 1fr; }
       .booking-steps { overflow-x: auto; }
     }
+
+    /* ── REVIEWS ── */
+    #reviews { }
+    .reviews-header-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 36px; flex-wrap: wrap; gap: 16px;
+    }
+    .reviews-avg-badge {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg2); border: 1px solid var(--border);
+      padding: 14px 22px;
+    }
+    .reviews-avg-num {
+      font-family: 'Unbounded', sans-serif; font-size: 36px; font-weight: 300;
+      color: var(--gold); line-height: 1;
+    }
+    .reviews-avg-stars { font-size: 18px; color: var(--gold); letter-spacing: 2px; }
+    .reviews-avg-label { font-size: 10px; color: var(--text-3); letter-spacing: .15em; text-transform: uppercase; margin-top: 2px; }
+    .reviews-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 16px; margin-bottom: 48px;
+    }
+    .review-card {
+      background: var(--bg2); border: 1px solid var(--border2);
+      padding: 24px; position: relative;
+      transition: all 0.35s ease; overflow: hidden;
+    }
+    .review-card::before {
+      content: '"'; position: absolute; top: 10px; right: 18px;
+      font-family: 'Cormorant Garamond', serif; font-size: 72px;
+      color: rgba(201,168,76,.08); line-height: 1; pointer-events: none;
+    }
+    .review-card::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(201,168,76,.3), transparent);
+      opacity: 0; transition: opacity .35s;
+    }
+    .review-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+    .review-card:hover::after { opacity: 1; }
+    .review-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .review-avatar {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold) 0%, #7A5C1E 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 700;
+      color: #0A0800; border: 1px solid rgba(201,168,76,.4);
+    }
+    .review-meta {}
+    .review-author { font-family: 'Unbounded', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--text); line-height: 1.2; }
+    .review-date { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+    .review-stars { color: var(--gold); font-size: 13px; letter-spacing: 2px; margin-bottom: 10px; }
+    .review-text { font-size: 13px; color: var(--text-2); line-height: 1.75; font-style: italic; }
+    .loading-reviews { text-align: center; padding: 32px; color: var(--text-3); font-size: 13px; letter-spacing: .1em; }
+    .review-form-wrap {
+      background: var(--bg2); border: 1px solid var(--border2);
+      padding: 32px; max-width: 640px; margin: 0 auto; position: relative;
+    }
+    .review-form-wrap::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .review-form-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; margin-bottom: 24px; }
+    .review-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .star-rating { display: flex; gap: 4px; margin-top: 8px; }
+    .star {
+      font-size: 30px; color: #2a2a30; cursor: pointer; line-height: 1; user-select: none;
+      transition: color .18s ease, transform .22s cubic-bezier(.34,1.56,.64,1), filter .18s ease;
+    }
+    .star:hover { color: #E8C97A; transform: scale(1.35) rotate(-8deg); filter: drop-shadow(0 0 6px rgba(232,201,122,.7)); }
+    .star.active { color: var(--gold); transform: scale(1.2); filter: drop-shadow(0 0 4px rgba(201,168,76,.5)); }
+    .star.active:hover { transform: scale(1.35) rotate(-8deg); filter: drop-shadow(0 0 8px rgba(232,201,122,.9)); }
+    .star.pulse { animation: starPulse .35s ease; }
+    @keyframes starPulse { 0%{transform:scale(1.2)} 50%{transform:scale(1.6)} 100%{transform:scale(1.2)} }
+    @media(max-width:900px){ .reviews-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:600px){ .reviews-grid { grid-template-columns:1fr; } .review-fields { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -1660,9 +1736,21 @@
 
 <!-- ====== REVIEWS ====== -->
 <section id="reviews">
-  <div class="section-header reveal">
-    <div class="label">Клиенты о нас</div>
-    <h2 class="section-title">Отзывы <em>гостей</em></h2>
+  <div class="reviews-header-row reveal">
+    <div class="section-header" style="margin-bottom:0">
+      <div class="label">Клиенты о нас</div>
+      <h2 class="section-title" style="margin-bottom:0">Отзывы <em>гостей</em></h2>
+    </div>
+    <div class="reviews-avg-badge" id="reviewsAvgBadge" style="display:none">
+      <div>
+        <div class="reviews-avg-num" id="avgNum">—</div>
+        <div class="reviews-avg-stars" id="avgStars">★★★★★</div>
+      </div>
+      <div>
+        <div class="reviews-avg-label">Средняя<br>оценка</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:4px" id="avgCount">0 отзывов</div>
+      </div>
+    </div>
   </div>
 
   <!-- Existing reviews grid -->
@@ -2534,15 +2622,31 @@ async function loadReviews() {
       return;
     }
     const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+    // Update avg badge
+    const avg = (data.reduce((s,r)=>s+(r.rating||5),0)/data.length).toFixed(1);
+    const avgEl = document.getElementById('reviewsAvgBadge');
+    if (avgEl) {
+      avgEl.style.display = 'flex';
+      document.getElementById('avgNum').textContent = avg;
+      const fullStars = Math.round(parseFloat(avg));
+      document.getElementById('avgStars').textContent = '★'.repeat(fullStars)+'☆'.repeat(5-fullStars);
+      document.getElementById('avgCount').textContent = data.length + ' ' + (data.length===1?'отзыв':data.length<5?'отзыва':'отзывов');
+    }
     grid.innerHTML = data.map(r => {
       const d = new Date(r.created_at);
       const dateStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
       const stars = '★'.repeat(r.rating || 5) + '☆'.repeat(5 - (r.rating || 5));
+      const initials = r.name.trim().split(' ').map(w=>w[0]?.toUpperCase()||'').slice(0,2).join('');
       return `<div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar">${initials||r.name[0]?.toUpperCase()}</div>
+          <div class="review-meta">
+            <div class="review-author">${r.name}</div>
+            <div class="review-date">${dateStr}</div>
+          </div>
+        </div>
         <div class="review-stars">${stars}</div>
         <div class="review-text">${r.text}</div>
-        <div class="review-author">${r.name}</div>
-        <div class="review-date">${dateStr}</div>
       </div>`;
     }).join('');
   } catch(e) {
