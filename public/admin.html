@@ -1173,7 +1173,7 @@
     <a href="#services">Услуги</a>
     <a href="#masters">Мастера</a>
     <a href="#about">О нас</a>
-    <a href="#contacts">Контакты</a>
+    <a href="#reviews">Отзывы</a><a href="#contacts">Контакты</a>
     <a href="#booking" class="nav-cta">Записаться</a>
   </nav>
   <button class="menu-btn" id="menuBtn" aria-label="Меню">
@@ -1657,6 +1657,61 @@
 </section>
 
 <!-- ============================== CONTACTS ============================== -->
+
+<!-- ====== REVIEWS ====== -->
+<section id="reviews">
+  <div class="section-header reveal">
+    <div class="label">Клиенты о нас</div>
+    <h2 class="section-title">Отзывы <em>гостей</em></h2>
+  </div>
+
+  <!-- Existing reviews grid -->
+  <div class="reviews-grid reveal" id="reviewsGrid">
+    <div class="loading-reviews">Загрузка отзывов...</div>
+  </div>
+
+  <!-- Leave a review -->
+  <div class="review-form-wrap reveal reveal-delay-2">
+    <h3 class="review-form-title">Оставить отзыв</h3>
+    <div class="review-form">
+      <div class="review-fields">
+        <div class="form-group">
+          <label class="form-label">Ваше имя *</label>
+          <input type="text" class="form-input" id="reviewName" placeholder="Как вас зовут?" maxlength="40"
+            oninput="this.value=this.value.replace(/[^а-яёА-ЯЁa-zA-Z\s\-]/g,'')">
+          <div class="field-err" id="reviewNameErr"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Оценка *</label>
+          <div class="star-rating" id="starRating">
+            <span class="star" data-v="1" onclick="setRating(1)">★</span>
+            <span class="star" data-v="2" onclick="setRating(2)">★</span>
+            <span class="star" data-v="3" onclick="setRating(3)">★</span>
+            <span class="star" data-v="4" onclick="setRating(4)">★</span>
+            <span class="star" data-v="5" onclick="setRating(5)">★</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ваш отзыв *</label>
+        <textarea class="form-input" id="reviewText" rows="3"
+          placeholder="Расскажите о вашем визите в ZAFAR..."
+          maxlength="400" style="resize:vertical;min-height:90px"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+          <div class="field-err" id="reviewTextErr"></div>
+          <div style="font-size:10px;color:var(--text-3)" id="reviewCharCount">0 / 400</div>
+        </div>
+      </div>
+      <button class="btn-primary" id="reviewSubmitBtn" onclick="submitReview()" style="width:100%">
+        Опубликовать отзыв →
+      </button>
+      <div id="reviewSuccess" style="display:none;text-align:center;color:var(--gold);padding:16px;font-size:14px">
+        ✓ Спасибо! Ваш отзыв опубликован.
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="contacts" style="padding-bottom:0">
   <div class="section-header reveal" style="margin-bottom:40px">
     <div class="label">Найти нас</div>
@@ -2424,6 +2479,104 @@ function showToast(msg) {
 //   START
 // ============================================================
 document.addEventListener('DOMContentLoaded', init);
+
+// ============================================================
+//   REVIEWS
+// ============================================================
+let currentRating = 0;
+
+function setRating(v) {
+  currentRating = v;
+  document.querySelectorAll('.star').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.v) <= v);
+  });
+}
+
+document.getElementById('reviewText')?.addEventListener('input', function() {
+  document.getElementById('reviewCharCount').textContent = this.value.length + ' / 400';
+});
+
+async function loadReviews() {
+  const grid = document.getElementById('reviewsGrid');
+  try {
+    const { data, error } = await db.from('reviews')
+      .select('*').order('created_at', { ascending: false }).limit(9);
+    if (error || !data?.length) {
+      grid.innerHTML = `<div class="loading-reviews" style="grid-column:1/-1">Будьте первым — оставьте отзыв ниже!</div>`;
+      return;
+    }
+    const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+    grid.innerHTML = data.map(r => {
+      const d = new Date(r.created_at);
+      const dateStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+      const stars = '★'.repeat(r.rating || 5) + '☆'.repeat(5 - (r.rating || 5));
+      return `<div class="review-card">
+        <div class="review-stars">${stars}</div>
+        <div class="review-text">${r.text}</div>
+        <div class="review-author">${r.name}</div>
+        <div class="review-date">${dateStr}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = `<div class="loading-reviews" style="grid-column:1/-1">Будьте первым — оставьте отзыв ниже!</div>`;
+  }
+}
+
+async function submitReview() {
+  const nameEl = document.getElementById('reviewName');
+  const textEl = document.getElementById('reviewText');
+  const nameErr = document.getElementById('reviewNameErr');
+  const textErr = document.getElementById('reviewTextErr');
+  const btn = document.getElementById('reviewSubmitBtn');
+
+  nameErr.textContent = ''; textErr.textContent = '';
+  nameEl.classList.remove('invalid'); textEl.classList.remove('invalid');
+
+  let ok = true;
+  const name = nameEl.value.trim();
+  const text = textEl.value.trim();
+
+  if (!name || name.length < 2) {
+    nameErr.textContent = 'Введите ваше имя'; nameEl.classList.add('invalid'); ok = false;
+  }
+  if (!text || text.length < 5) {
+    textErr.textContent = 'Напишите отзыв (минимум 5 символов)'; textEl.classList.add('invalid'); ok = false;
+  }
+  if (currentRating === 0) {
+    document.getElementById('starRating').style.animation = 'shake 0.4s ease'; ok = false;
+    setTimeout(() => document.getElementById('starRating').style.animation = '', 400);
+  }
+  if (!ok) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Публикуем...';
+
+  try {
+    await db.from('reviews').insert({
+      name, text, rating: currentRating,
+      created_at: new Date().toISOString()
+    });
+    btn.style.display = 'none';
+    document.getElementById('reviewSuccess').style.display = 'block';
+    nameEl.value = ''; textEl.value = ''; currentRating = 0;
+    document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+    document.getElementById('reviewCharCount').textContent = '0 / 400';
+    setTimeout(loadReviews, 500);
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Опубликовать отзыв →';
+    showToast('Ошибка. Попробуйте ещё раз.');
+  }
+}
+
+// Load reviews on page load
+document.addEventListener('DOMContentLoaded', loadReviews);
+
+// Shake animation
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }';
+document.head.appendChild(shakeStyle);
+
 </script>
 </body>
 </html>
