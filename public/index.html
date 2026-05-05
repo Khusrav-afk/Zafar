@@ -600,25 +600,58 @@
 </section>
 
 <script>
-const BRANCHES=[
-  {lat:40.299109,lon:69.618473,name:'ZAFAR — Точка 1 · ул. Рифата Ходжиева, 157',phone:'+992 77 777-1111'},
-  {lat:40.295039,lon:69.605639,name:'ZAFAR — Точка 2 · ул. Рифата Ходжиева, 1',phone:'+992 99 999-7070'},
-  {lat:40.292080,lon:69.596141,name:'ZAFAR — Точка 3 · 13-й микрорайон, д. 1',phone:'+992 99 999-0707'},
-  {lat:40.274124,lon:69.637868,name:'ZAFAR — Точка 4 · просп. Исмоила Сомони, 170А',phone:'+992 92 222-5050'},
+// Центр между всеми точками ZAFAR в Худжанде
+const BRANCH_COORDS = [
+  {lat:40.299109,lon:69.618473,name:'Точка 1 — ул. Рифата Ходжиева, 157'},
+  {lat:40.295039,lon:69.605639,name:'Точка 2 — ул. Рифата Ходжиева, 1'},
+  {lat:40.292080,lon:69.596141,name:'Точка 3 — 13-й микрорайон, д. 1'},
+  {lat:40.274124,lon:69.637868,name:'Точка 4 — просп. Исмоила Сомони, 170А'},
 ];
-let ymapObj=null;
-function initYmap(){
-  if(typeof ymaps==='undefined')return;
-  ymaps.ready(()=>{
-    const lats=BRANCHES.map(b=>b.lat),lons=BRANCHES.map(b=>b.lon);
-    ymapObj=new ymaps.Map('ymap',{center:[(Math.min(...lats)+Math.max(...lats))/2,(Math.min(...lons)+Math.max(...lons))/2],zoom:13,controls:['zoomControl']},{suppressMapOpenBlock:true});
-    ymapObj.behaviors.disable('scrollZoom');
-    const L=ymaps.templateLayoutFactory.createClass('<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid #C8A97E;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;transform:translateX(-50%) translateY(-50%)"><img src="images/image9.jpg" style="width:100%;height:100%;object-fit:cover"/></div>');
-    BRANCHES.forEach(b=>{ymapObj.geoObjects.add(new ymaps.Placemark([b.lat,b.lon],{balloonContent:`<strong>${b.name}</strong><br>${b.phone}`},{iconLayout:L,iconShape:{type:'Circle',coordinates:[0,0],radius:18}});});
+
+function initMap() {
+  const mapEl = document.getElementById('ymap');
+  if (!mapEl) return;
+  mapEl.innerHTML = '';
+  mapEl.style.position = 'relative';
+  mapEl.style.overflow = 'hidden';
+
+  // OSM iframe с нужным bbox для всех 4 точек Худжанда
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'width:100%;height:100%;border:none;filter:invert(90%) hue-rotate(180deg) brightness(0.85) contrast(1.1);';
+  iframe.loading = 'lazy';
+  iframe.src = 'https://www.openstreetmap.org/export/embed.html?bbox=69.580%2C40.265%2C40.660%2C69.650&bbox=69.580%2C40.265%2C69.650%2C40.310&layer=mapnik';
+  mapEl.appendChild(iframe);
+
+  // Кнопка открыть в картах
+  const link = document.createElement('a');
+  link.href = 'https://www.openstreetmap.org/#map=14/40.2907/69.6121';
+  link.target = '_blank';
+  link.style.cssText = 'position:absolute;bottom:12px;right:12px;background:rgba(10,10,15,0.9);border:1px solid rgba(201,168,76,0.4);color:#C9A84C;font-family:Jost,sans-serif;font-size:11px;letter-spacing:.1em;padding:6px 14px;text-decoration:none;text-transform:uppercase;';
+  link.textContent = 'Открыть карту →';
+  mapEl.appendChild(link);
+
+  // Маркеры точек
+  const markersWrap = document.createElement('div');
+  markersWrap.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;';
+  // Просто информационные плашки
+  BRANCH_COORDS.forEach((b,i) => {
+    const pin = document.createElement('div');
+    pin.style.cssText = 'position:absolute;background:#C9A84C;color:#0a0800;font-size:10px;font-weight:700;padding:3px 8px;letter-spacing:.05em;white-space:nowrap;pointer-events:none;';
+    // Позиции примерные для 4 точек на карте
+    const positions = ['top:20%;left:62%','top:35%;left:42%','top:48%;left:28%','top:78%;left:75%'];
+    pin.style.cssText += ';' + positions[i];
+    pin.textContent = `Точка ${i+1}`;
+    markersWrap.appendChild(pin);
   });
+  mapEl.appendChild(markersWrap);
 }
-function selectBranch(idx){if(!ymapObj)return;const b=BRANCHES[idx];ymapObj.setCenter([b.lat,b.lon],17,{duration:500});}
-(function(){const s=document.createElement('script');s.src='https://api-maps.yandex.ru/2.1/?apikey=&lang=ru_RU';s.onload=initYmap;document.head.appendChild(s);})();
+
+function selectBranch(idx) {
+  // При клике на точку — скроллим к карте и показываем подсказку
+  document.getElementById('ymap').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+document.addEventListener('DOMContentLoaded', initMap);
 </script>
 
 <footer>
@@ -962,7 +995,17 @@ async function submitReview(){
   if(!ok)return;
   btn.disabled=true;btn.textContent='Публикуем...';
   try{
-    await db.from('reviews').insert({name,text,rating:currentRating,branch:currentReviewBranch,created_at:new Date().toISOString()});
+    // Пробуем с полем branch, если колонки нет — без него
+    const reviewData = {name,text,rating:currentRating,created_at:new Date().toISOString()};
+    if(currentReviewBranch) reviewData.branch = currentReviewBranch;
+    const {error:revErr} = await db.from('reviews').insert(reviewData);
+    if(revErr) {
+      // Если ошибка из-за branch — пробуем без него
+      if(revErr.message && revErr.message.includes('branch')) {
+        const {error:revErr2} = await db.from('reviews').insert({name,text,rating:currentRating,created_at:new Date().toISOString()});
+        if(revErr2) throw revErr2;
+      } else { throw revErr; }
+    }
     btn.style.display='none';document.getElementById('reviewSuccess').style.display='block';
     nameEl.value='';textEl.value='';currentRating=0;currentReviewBranch='';
     document.querySelectorAll('.star').forEach(s=>s.classList.remove('active'));
